@@ -23,17 +23,17 @@ import org.bukkit.util.Vector;
 
 public class LaunchPad implements Listener {
 	//Stores a list of fully created and active cannons
-	Map<Location, Rocket> launchpads = new ConcurrentHashMap<Location, Rocket>();
+	private Map<Location, Rocket> launchpads = new ConcurrentHashMap<Location, Rocket>();
 
 	//Stores a list of partially created cannons
-	Map<UUID, Rocket> partialLP = new ConcurrentHashMap<UUID, Rocket>();
+	private Map<UUID, Rocket> partialLP = new ConcurrentHashMap<UUID, Rocket>();
 
 	//Stores a list of players who have created a cannon and need to set it's destination
-	Set<UUID> destMode = new HashSet<UUID>();
+	private Set<UUID> destMode = new HashSet<UUID>();
 	
 	private class Teleport extends BukkitRunnable {
-		String player;
-		Rocket rocket;
+		private String player;
+		private Rocket rocket;
 		
 		private Teleport(String player, Rocket rocket) {
 			this.player = player;

@@ -1,0 +1,12 @@
+name: RocketTeleport
+version: 0.0.1
+description: A plugin that launches the player into the air and then teleports them.
+author: Alshain01
+website: http://dev.bukkit.org/bukkit-plugins/rocketteleport/
+main: io.github.alshain01.RocketTeleport.Main
+commands:
+  rocketteleport:
+    description: RocketTeleport command
+    permission: rocketteleport.command
+    alias: rt
+    usage: /rocketteleport <RocketType> [Radius]
