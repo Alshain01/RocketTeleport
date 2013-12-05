@@ -5,6 +5,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>RocketCannon</name>
   <description>A plugin that launches the player into the air and then teleports them.</description>
+  <url>http://dev.bukkit.org/bukkit-plugins/rocketteleport</url>
 
     <properties>
         <project.author>Alshain01</project.author>
