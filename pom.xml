@@ -1,11 +1,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.alshain01</groupId>
-  <artifactId>TeleportCannon</artifactId>
+  <artifactId>RocketCannon</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>TeleportCannon</name>
   <description>A plugin that launches the player into the air and then teleports them.</description>
-  
+
+    <properties>
+        <project.author>Alshain01</project.author>
+        <project.main>io.github.alshain01.RocketTeleport.RocketTeleport</project.main>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
   	<repositories>
 		<repository>
 			<id>bukkit-repo</id>
