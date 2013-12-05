@@ -3,7 +3,7 @@
   <groupId>io.github.alshain01</groupId>
   <artifactId>RocketCannon</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>TeleportCannon</name>
+  <name>RocketCannon</name>
   <description>A plugin that launches the player into the air and then teleports them.</description>
 
     <properties>
