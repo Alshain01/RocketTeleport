@@ -1,4 +1,6 @@
+#
 # The number of attempts RocketTeleport will try to find a suitable random landing zone.
+#
 Retries: 20
 # Lists the block types that a random rocket will not teleport to.  Underscores should be used instead of spaces.
 # Names are Material Types exactly as shown here: http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html
@@ -8,3 +10,8 @@ Exclusions:
   - STATIONARY_LAVA
   - WATER
   - STATIONARY_WATER
+#
+# Enable or Disable MCStats metrics logging
+#
+Metrics:
+  Enabled: true

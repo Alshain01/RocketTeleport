@@ -1,5 +1,6 @@
 package io.github.alshain01.RocketTeleport;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,16 +23,26 @@ public class RocketTeleport extends JavaPlugin {
         ConfigurationSerialization.registerClass(Rocket.class);
         List<?> list = this.getConfig().getList("Exclusions");
         Set<Material> exclusions = new HashSet();
+        int retries = data.getConfig().getInt("Retries");
+
         for(Object o : list) {
             exclusions.add(Material.valueOf((String)o));
         }
-        int retries = data.getConfig().getInt("Retries");
+
         if(data.getConfig().isConfigurationSection("LaunchPads")) {
             launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions, retries);
         } else {
             launchPad = new LaunchPad(exclusions, retries);
         }
 		this.getServer().getPluginManager().registerEvents(launchPad, this);
+
+        if(this.getConfig().getBoolean("Metrics.Enabled")) {
+            try {
+                new MetricsLite(this).start();
+            } catch (IOException ex) {
+                this.getLogger().warning("Metrics failed to start.");
+            }
+        }
 	}
 
     @Override
