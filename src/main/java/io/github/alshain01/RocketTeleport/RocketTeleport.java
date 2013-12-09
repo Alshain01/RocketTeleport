@@ -2,19 +2,41 @@ package io.github.alshain01.RocketTeleport;
 
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class RocketTeleport extends JavaPlugin {
-	LaunchPad launchPad = new LaunchPad();
-	
+	LaunchPad launchPad;
+    CustomYML data = new CustomYML(this, "data.yml");
+
+    protected static void Debug(String m) {
+        Bukkit.getPluginManager().getPlugin("RocketTeleport").getLogger().info("[DEBUG] " + m);
+    }
+
 	@Override
 	public void onEnable() {
-		this.getServer().getPluginManager().registerEvents(launchPad, this);		
+        ConfigurationSerialization.registerClass(Rocket.class);
+        if(data.getConfig().isConfigurationSection("LaunchPads")) {
+            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"));
+        } else {
+            launchPad = new LaunchPad();
+        }
+		this.getServer().getPluginManager().registerEvents(launchPad, this);
 	}
-	
+
+    @Override
+	public void onDisable() {
+        data.getConfig().createSection("LaunchPads"); //Overwrite every time
+        launchPad.write(data.getConfig().getConfigurationSection("LaunchPads"));
+        data.saveConfig();
+        ConfigurationSerialization.unregisterClass(Rocket.class);
+    }
+
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if(!cmd.getName().equals("rocketteleport") || args.length < 1) {
@@ -28,27 +50,28 @@ public class RocketTeleport extends JavaPlugin {
 		UUID player = ((Player)sender).getUniqueId(); 
 		
 		// Is the player setting a landing zone?
-		if (args[1].equalsIgnoreCase("land") && launchPad.hasPartialCannon(player)) {
+		if (args[0].equalsIgnoreCase("land") && launchPad.hasPartialCannon(player)) {
 			if(args.length > 1) {
 				return false;
 			}
 			launchPad.setLandMode(player);
-			sender.sendMessage("Right click the landing zone.");
+			sender.sendMessage("Left click the landing zone.");
 			return true;
 		}
 
 		// Is the player attempting to create a cannon while one is already in the queue?
-		if(launchPad.hasPartialCannon(player)) {
+		if(!args[0].equalsIgnoreCase("cancel") && launchPad.hasPartialCannon(player)) {
 			sender.sendMessage("You already have a launch pad pending, use /rt land to complete it.");
+            return true;
 		}
 		
 		// Is the player creating a random cannon?
-		if(args[1].equalsIgnoreCase("random") && args.length < 2) {
+		if(args[0].equalsIgnoreCase("random") && args.length < 2) {
 			sender.sendMessage("/rocketteleport random <Radius>");
 			return true;
 		}
 		
-		if(args[1].equalsIgnoreCase("random")) {
+		if(args[0].equalsIgnoreCase("random")) {
 			double radius;
 			try {
 				radius = Double.valueOf(args[1]);
@@ -66,16 +89,22 @@ public class RocketTeleport extends JavaPlugin {
 			return false;
 		}
 	
-		if(args[1].equalsIgnoreCase("soft")) {
+		if(args[0].equalsIgnoreCase("soft")) {
 			launchPad.addPartialCannon(player, new Rocket(RocketType.SOFT));
 			sender.sendMessage("Right click the button you wish to use as a rocket trigger.");
 			return true;
-		} else if (args[1].equalsIgnoreCase("hard")) {
+		} else if (args[0].equalsIgnoreCase("hard")) {
 			launchPad.addPartialCannon(player, new Rocket(RocketType.HARD));
 			sender.sendMessage("Right click the button you wish to use as a rocket trigger.");
 			return true;
-		}
-		
+		} else if (args[0].equalsIgnoreCase("cancel")) {
+            if(launchPad.cancelCreation(player)) {
+                sender.sendMessage("Rocket LaunchPad creation canceled.");
+                return true;
+            }
+            sender.sendMessage("There is no pending LaunchPad creation.");
+            return true;
+        }
 		return false;
 	}
 }

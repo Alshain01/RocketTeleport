@@ -1,6 +1,7 @@
 package io.github.alshain01.RocketTeleport;
 
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,8 +32,37 @@ public class LaunchPad implements Listener {
 
 	//Stores a list of players who have created a cannon and need to set it's destination
 	private Set<UUID> destMode = new HashSet<UUID>();
-	
-	private class Teleport extends BukkitRunnable {
+
+    public LaunchPad(ConfigurationSection config) {
+        Set<String> k = config.getKeys(false);
+        for(String l : k) {
+            launchpads.put(getLocationFromString(l), new Rocket(config.getConfigurationSection(l).getValues(false)));
+        }
+    }
+
+    public LaunchPad() {
+
+    }
+
+    public void write(ConfigurationSection config) {
+        for(Location l : launchpads.keySet()) {
+            String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();
+            config.set(loc, launchpads.get(l).serialize());
+        }
+    }
+
+    private Location getLocationFromString(String s) {
+        String[] arg = s.split(",");
+        int[] parsed = new int[3];
+
+        for (int a = 0; a < 3; a++) {
+            parsed[a] = Integer.parseInt(arg[a + 1]);
+        }
+
+        return new Location (Bukkit.getWorld(arg[0]), parsed[0], parsed[1], parsed[2]);
+    }
+
+ 	private class Teleport extends BukkitRunnable {
 		private String player;
 		private Rocket rocket;
 		
@@ -50,7 +81,8 @@ public class LaunchPad implements Listener {
 					landing = rocket.getDestination().add(0,1,0);
 					break;
 				case HARD:
-					landing = rocket.getDestination().add(0, 500, 0);
+					landing = rocket.getDestination().add(0, 75, 0);
+                    break;
 				case RANDOM:
 					double xloc = (rocket.getTrigger().getX() - rocket.getRadius()) + Math.random() * (rocket.getRadius()*2);
 					double zloc = (rocket.getTrigger().getZ() - rocket.getRadius()) + Math.random() * (rocket.getRadius()*2);
@@ -67,7 +99,21 @@ public class LaunchPad implements Listener {
 	protected boolean hasPartialCannon(UUID player) {
 		return partialLP.containsKey(player);
 	}
-	
+
+    protected boolean cancelCreation(UUID player) {
+        boolean cancelled = false;
+        if(partialLP.containsKey(player)) {
+            partialLP.remove(player);
+            cancelled = true;
+        }
+          
+        if(destMode.contains(player)) {
+            destMode.remove(player);
+            cancelled = true;
+        }
+        return cancelled;
+    }
+
 	protected void addPartialCannon(UUID player, Rocket cannon) {
 		partialLP.put(player, cannon);
 	}
@@ -77,20 +123,23 @@ public class LaunchPad implements Listener {
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	private void onPlayerQuit(PlayerQuitEvent e) {
+	public void onPlayerQuit(PlayerQuitEvent e) {
 		partialLP.remove(e.getPlayer().getUniqueId());
 		destMode.remove(e.getPlayer().getUniqueId());
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	private void onActivateCannon(PlayerInteractEvent e) {
+	public void onActivateCannon(PlayerInteractEvent e) {
 		if(e.getAction() != Action.RIGHT_CLICK_BLOCK 
-				|| e.getClickedBlock().getType() != Material.STONE_BUTTON 
-				|| e.getClickedBlock().getType() != Material.WOOD_BUTTON) {
+				|| (e.getClickedBlock().getType() != Material.STONE_BUTTON
+				&& e.getClickedBlock().getType() != Material.WOOD_BUTTON)) {
 			return;
 		}
-		
+
+        RocketTeleport.Debug("Player interacted with button.");
+
 		if(launchpads.containsKey(e.getClickedBlock().getLocation())) {
+            RocketTeleport.Debug("LaunchPad found.");
 			Rocket rocket = launchpads.get(e.getClickedBlock().getLocation()); 
 			if(e.getPlayer().getLocation().getY() < e.getPlayer().getWorld().getHighestBlockYAt(e.getPlayer().getLocation())) {
 				e.getPlayer().teleport(rocket.getDestination());
@@ -98,24 +147,26 @@ public class LaunchPad implements Listener {
 			}
 			
 			e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.EXPLODE, 20, 0);
-			e.getPlayer().setVelocity(new Vector(0D, 5D, 0D));
-			new Teleport(e.getPlayer().getName(), rocket).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 20 * 5);
+			e.getPlayer().setVelocity(new Vector(0D, 10D, 0D));
+			new Teleport(e.getPlayer().getName(), rocket).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 20 * 2);
 		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	private void onCreateCannon(PlayerInteractEvent e) {
+	public void onCreateCannon(PlayerInteractEvent e) {
 		if(!partialLP.containsKey(e.getPlayer().getUniqueId())
 				|| partialLP.get(e.getPlayer().getUniqueId()).getTrigger() != null) {
 			return;
 		}
-		
+
 		if(e.getAction() != Action.RIGHT_CLICK_BLOCK 
-				|| e.getClickedBlock().getType() != Material.STONE_BUTTON 
-				|| e.getClickedBlock().getType() != Material.WOOD_BUTTON) {
+				|| (e.getClickedBlock().getType() != Material.STONE_BUTTON
+				&& e.getClickedBlock().getType() != Material.WOOD_BUTTON)) {
 			return;
 		}
-		
+
+        RocketTeleport.Debug("Player interacted with button. Partial LaunchPad found.");
+
 		// Don't need to activate the button.
 		e.setCancelled(true);
 		
@@ -132,12 +183,12 @@ public class LaunchPad implements Listener {
 		
 		// The cannon still needs a destination
 		partialLP.put(e.getPlayer().getUniqueId(), cannon);
-		e.getPlayer().sendMessage("Trigger location set, use //tc land to create landing zone.");
+		e.getPlayer().sendMessage("Trigger location set, use /rt land to create landing zone.");
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	private void onSetDestination(PlayerInteractEvent e) {
-		if(e.getAction() != Action.RIGHT_CLICK_BLOCK
+	public void onSetDestination(PlayerInteractEvent e) {
+		if(e.getAction() != Action.LEFT_CLICK_BLOCK
 				|| !destMode.contains(e.getPlayer().getUniqueId())
 				|| partialLP.get(e.getPlayer().getUniqueId()).getTrigger() == null) {
 			return;

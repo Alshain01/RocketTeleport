@@ -8,5 +8,9 @@ commands:
   rocketteleport:
     description: RocketTeleport command
     permission: rocketteleport.command
-    alias: rt
+    aliases: rt
     usage: /rocketteleport <RocketType> [Radius]
+permission:
+  rocketteleport.command:
+    description: Allows access to the rocketteleport command.
+    default: op
