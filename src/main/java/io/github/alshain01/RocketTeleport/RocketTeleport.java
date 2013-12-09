@@ -25,11 +25,11 @@ public class RocketTeleport extends JavaPlugin {
         for(Object o : list) {
             exclusions.add(Material.valueOf((String)o));
         }
-
+        int retries = data.getConfig().getInt("Retries");
         if(data.getConfig().isConfigurationSection("LaunchPads")) {
-            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions);
+            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions, retries);
         } else {
-            launchPad = new LaunchPad(exclusions);
+            launchPad = new LaunchPad(exclusions, retries);
         }
 		this.getServer().getPluginManager().registerEvents(launchPad, this);
 	}

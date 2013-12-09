@@ -37,16 +37,20 @@ public class LaunchPad implements Listener {
     //Store a list of blocks that players should not be randomly teleported to.
     private Set<Material> exclusions = new HashSet<Material>();
 
-    protected LaunchPad(ConfigurationSection config, Set<Material> exclusions) {
+    private int retries;
+
+    protected LaunchPad(ConfigurationSection config, Set<Material> exclusions, int retries) {
         Set<String> k = config.getKeys(false);
         for(String l : k) {
             launchpads.put(getLocationFromString(l), new Rocket(config.getConfigurationSection(l).getValues(false)));
         }
         this.exclusions = exclusions;
+        this.retries = retries;
     }
 
-    protected LaunchPad(Set<Material> exclusions) {
+    protected LaunchPad(Set<Material> exclusions, int retries) {
         this.exclusions = exclusions;
+        this.retries = retries;
     }
 
     protected void write(ConfigurationSection config) {
@@ -140,8 +144,8 @@ public class LaunchPad implements Listener {
             Location loc = new Location(trigger.getWorld(), xloc, 0D, zloc);
             landing = loc.getWorld().getHighestBlockAt(loc);
             count ++;
-        } while (!validType(landing.getType()) && count <= 20);
-        if(count > 20) { return null; }
+        } while (!validType(landing.getType()) && count <= retries);
+        if(count > retries) { return null; }
         return landing.getLocation().add(0, 1, 0);
     }
 
@@ -183,7 +187,7 @@ public class LaunchPad implements Listener {
             if(rocket.getType().equals(RocketType.RANDOM)) {
                 dest = getRandomLocation(rocket.getTrigger(), rocket.getRadius());
                 if(dest == null) {
-                    e.getPlayer().sendMessage("Failed to locate suitable destination after 20 tries.");
+                    e.getPlayer().sendMessage("Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
             } else {
