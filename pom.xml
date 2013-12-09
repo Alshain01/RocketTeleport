@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.github.alshain01</groupId>
   <artifactId>RocketTeleport</artifactId>
-  <version>0.1.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>RocketTeleport</name>
   <description>A plugin that launches the player into the air and then teleports them.</description>
   <url>http://dev.bukkit.org/bukkit-plugins/rocketteleport</url>

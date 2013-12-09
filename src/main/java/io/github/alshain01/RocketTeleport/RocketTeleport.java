@@ -1,5 +1,6 @@
 package io.github.alshain01.RocketTeleport;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -27,6 +28,12 @@ public class RocketTeleport extends JavaPlugin {
             launchPad = new LaunchPad();
         }
 		this.getServer().getPluginManager().registerEvents(launchPad, this);
+        try {
+            new MetricsLite(this).start();
+        } catch (IOException e) {
+            this.getLogger().warning("Failed to start Metrics.");
+        }
+
 	}
 
     @Override
