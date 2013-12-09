@@ -1,0 +1,8 @@
+# Lists the block types that a random rocket will not teleport to.  Underscores should be used instead of spaces.
+# Names are Material Types exactly as shown here: http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html
+Exclusions:
+  - AIR
+  - LAVA
+  - STATIONARY_LAVA
+  - WATER
+  - STATIONARY_WATER

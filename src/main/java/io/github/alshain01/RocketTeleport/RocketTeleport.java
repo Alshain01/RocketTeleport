@@ -1,8 +1,12 @@
 package io.github.alshain01.RocketTeleport;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -21,10 +25,16 @@ public class RocketTeleport extends JavaPlugin {
 	@Override
 	public void onEnable() {
         ConfigurationSerialization.registerClass(Rocket.class);
+        List<?> list = this.getConfig().getList("Exclusions");
+        Set<Material> exclusions = new HashSet();
+        for(Object o : list) {
+            exclusions.add(Material.valueOf((String)o));
+        }
+
         if(data.getConfig().isConfigurationSection("LaunchPads")) {
-            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"));
+            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions);
         } else {
-            launchPad = new LaunchPad();
+            launchPad = new LaunchPad(exclusions);
         }
 		this.getServer().getPluginManager().registerEvents(launchPad, this);
 	}

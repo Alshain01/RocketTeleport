@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,15 +34,18 @@ public class LaunchPad implements Listener {
 	//Stores a list of players who have created a cannon and need to set it's destination
 	private Set<UUID> destMode = new HashSet<UUID>();
 
-    public LaunchPad(ConfigurationSection config) {
+    private Set<Material> exclusions = new HashSet<Material>();
+
+    public LaunchPad(ConfigurationSection config, Set<Material> exclusions) {
         Set<String> k = config.getKeys(false);
         for(String l : k) {
             launchpads.put(getLocationFromString(l), new Rocket(config.getConfigurationSection(l).getValues(false)));
         }
+        this.exclusions = exclusions;
     }
 
-    public LaunchPad() {
-
+    public LaunchPad(Set<Material> exclusions) {
+        this.exclusions = exclusions;
     }
 
     public void write(ConfigurationSection config) {
@@ -95,6 +99,26 @@ public class LaunchPad implements Listener {
 			player.teleport(landing, TeleportCause.PLUGIN);
 		}
 	}
+
+    private Location getRandomLocation(Location trigger, double radius) {
+        Block landing;
+        do {
+            double xloc = (trigger.getX() - radius) + Math.random() * (radius*2);
+            double zloc = (trigger.getZ() - radius) + Math.random() * (radius*2);
+            Location loc = new Location(trigger.getWorld(), xloc, 0D, zloc);
+            landing = loc.getWorld().getHighestBlockAt(loc);
+        } while (!validType(landing.getType()));
+        return landing.getLocation().add(0, 1, 0);
+    }
+
+    private boolean validType(Material type) {
+        for(Material m : exclusions) {
+            if(type.equals(m)) {
+                return false;
+            }
+        }
+        return true;
+    }
 	
 	protected boolean hasPartialCannon(UUID player) {
 		return partialLP.containsKey(player);
