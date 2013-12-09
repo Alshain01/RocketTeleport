@@ -195,6 +195,8 @@ public class MetricsLite {
      * @return true if metrics should be opted out of it
      */
     public boolean isOptOut() {
+        return false;
+        /*
         synchronized (optOutLock) {
             try {
                 // Reload the metrics file
@@ -212,6 +214,7 @@ public class MetricsLite {
             }
             return configuration.getBoolean("opt-out", false);
         }
+        */
     }
 
     /**
