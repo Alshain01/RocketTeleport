@@ -132,13 +132,16 @@ public class LaunchPad implements Listener {
     }
 
     private Location getRandomLocation(Location trigger, double radius) {
+        int count = 0;
         Block landing;
         do {
             double xloc = (trigger.getX() - radius) + Math.random() * (radius*2);
             double zloc = (trigger.getZ() - radius) + Math.random() * (radius*2);
             Location loc = new Location(trigger.getWorld(), xloc, 0D, zloc);
             landing = loc.getWorld().getHighestBlockAt(loc);
-        } while (!validType(landing.getType()));
+            count ++;
+        } while (!validType(landing.getType()) && count <= 20);
+        if(count > 20) { return null; }
         return landing.getLocation().add(0, 1, 0);
     }
 
@@ -179,6 +182,10 @@ public class LaunchPad implements Listener {
             Location dest;
             if(rocket.getType().equals(RocketType.RANDOM)) {
                 dest = getRandomLocation(rocket.getTrigger(), rocket.getRadius());
+                if(dest == null) {
+                    e.getPlayer().sendMessage("Failed to locate suitable destination after 20 tries.");
+                    return;
+                }
             } else {
                 dest = rocket.getDestination();
             }
