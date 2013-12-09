@@ -5,11 +5,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,12 +16,9 @@ public class RocketTeleport extends JavaPlugin {
 	LaunchPad launchPad;
     CustomYML data = new CustomYML(this, "data.yml");
 
-    protected static void Debug(String m) {
-        Bukkit.getPluginManager().getPlugin("RocketTeleport").getLogger().info("[DEBUG] " + m);
-    }
-
 	@Override
 	public void onEnable() {
+        this.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Rocket.class);
         List<?> list = this.getConfig().getList("Exclusions");
         Set<Material> exclusions = new HashSet();
@@ -60,7 +55,7 @@ public class RocketTeleport extends JavaPlugin {
 		UUID player = ((Player)sender).getUniqueId(); 
 		
 		// Is the player setting a landing zone?
-		if (args[0].equalsIgnoreCase("land") && launchPad.hasPartialCannon(player)) {
+		if (args[0].equalsIgnoreCase("land") && launchPad.hasPartialRocket(player)) {
 			if(args.length > 1) {
 				return false;
 			}
@@ -70,7 +65,7 @@ public class RocketTeleport extends JavaPlugin {
 		}
 
 		// Is the player attempting to create a cannon while one is already in the queue?
-		if(!args[0].equalsIgnoreCase("cancel") && launchPad.hasPartialCannon(player)) {
+		if(!args[0].equalsIgnoreCase("cancel") && launchPad.hasPartialRocket(player)) {
 			sender.sendMessage("You already have a launch pad pending, use /rt land to complete it.");
             return true;
 		}
@@ -90,7 +85,7 @@ public class RocketTeleport extends JavaPlugin {
 				return true;
 			}
 			
-			launchPad.addPartialCannon(player, new Rocket(radius));
+			launchPad.addPartialRocket(player, new Rocket(radius));
 			sender.sendMessage("Right click the button you wish to use as a rocket trigger." );
 			return true;
 		}
@@ -100,11 +95,11 @@ public class RocketTeleport extends JavaPlugin {
 		}
 	
 		if(args[0].equalsIgnoreCase("soft")) {
-			launchPad.addPartialCannon(player, new Rocket(RocketType.SOFT));
+			launchPad.addPartialRocket(player, new Rocket(RocketType.SOFT));
 			sender.sendMessage("Right click the button you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("hard")) {
-			launchPad.addPartialCannon(player, new Rocket(RocketType.HARD));
+			launchPad.addPartialRocket(player, new Rocket(RocketType.HARD));
 			sender.sendMessage("Right click the button you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("cancel")) {
