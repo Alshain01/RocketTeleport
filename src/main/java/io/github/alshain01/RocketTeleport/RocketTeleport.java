@@ -97,7 +97,7 @@ public class RocketTeleport extends JavaPlugin {
 			}
 			
 			launchPad.addPartialRocket(player, new Rocket(radius));
-			sender.sendMessage("Right click the button you wish to use as a rocket trigger." );
+			sender.sendMessage("Right click the button or plate you wish to use as a rocket trigger." );
 			return true;
 		}
 		
@@ -107,11 +107,11 @@ public class RocketTeleport extends JavaPlugin {
 	
 		if(args[0].equalsIgnoreCase("soft")) {
 			launchPad.addPartialRocket(player, new Rocket(RocketType.SOFT));
-			sender.sendMessage("Right click the button you wish to use as a rocket trigger.");
+			sender.sendMessage("Right click the button or plate you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("hard")) {
 			launchPad.addPartialRocket(player, new Rocket(RocketType.HARD));
-			sender.sendMessage("Right click the button you wish to use as a rocket trigger.");
+			sender.sendMessage("Right click the button or plate you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("cancel")) {
             if(launchPad.cancelCreation(player)) {

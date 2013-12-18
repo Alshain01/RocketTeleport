@@ -1,9 +1,6 @@
 package io.github.alshain01.RocketTeleport;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
@@ -36,6 +33,12 @@ public class LaunchPad implements Listener {
 
     //Store a list of blocks that players should not be randomly teleported to.
     private Set<Material> exclusions = new HashSet<Material>();
+
+    private static final Set<Material> triggerTypes = new HashSet<Material>(Arrays.asList(
+            Material.WOOD_BUTTON,
+            Material.WOOD_PLATE,
+            Material.STONE_BUTTON,
+            Material.STONE_PLATE));
 
     private int retries;
 
@@ -170,9 +173,9 @@ public class LaunchPad implements Listener {
      */
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	private void onActivateRocket(PlayerInteractEvent e) {
-		if(e.getAction() != Action.RIGHT_CLICK_BLOCK 
-				|| (e.getClickedBlock().getType() != Material.STONE_BUTTON
-				&& e.getClickedBlock().getType() != Material.WOOD_BUTTON)) {
+		if(e.getAction() != Action.RIGHT_CLICK_BLOCK
+                && e.getAction() != Action.PHYSICAL
+				|| !triggerTypes.contains(e.getClickedBlock().getType())) {
 			return;
 		}
 
@@ -211,8 +214,7 @@ public class LaunchPad implements Listener {
 		}
 
 		if(e.getAction() != Action.RIGHT_CLICK_BLOCK 
-				|| (e.getClickedBlock().getType() != Material.STONE_BUTTON
-				&& e.getClickedBlock().getType() != Material.WOOD_BUTTON)) {
+				|| triggerTypes.contains(e.getClickedBlock().getType())) {
 			return;
 		}
 
@@ -261,7 +263,7 @@ public class LaunchPad implements Listener {
     /*
      * Handles destruction of a rocket launch pad
      */
-    @EventHandler(priority = EventPriority.HIGH.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     private void onBlockBreak(BlockBreakEvent e) {
         if(launchpads.containsKey(e.getBlock().getLocation())) {
             launchpads.remove(e.getBlock().getLocation());
