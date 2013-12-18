@@ -97,11 +97,11 @@ public class LaunchPad implements Listener {
 		private Rocket rocket;
         private Location destination = null;
 		
-		private Teleport(String player, Rocket rocket) {
+		/*private Teleport(String player, Rocket rocket) {
             this.player = player;
             this.rocket = rocket;
             this.destination = rocket.getDestination();
-        }
+        }*/
 
         private Teleport(String player, Rocket rocket, Location destination) {
             this.player = player;

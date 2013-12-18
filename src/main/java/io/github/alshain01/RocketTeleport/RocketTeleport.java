@@ -22,7 +22,7 @@ public class RocketTeleport extends JavaPlugin {
         this.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Rocket.class);
         List<?> list = this.getConfig().getList("Exclusions");
-        Set<Material> exclusions = new HashSet();
+        Set<Material> exclusions = new HashSet<Material>();
         int retries = data.getConfig().getInt("Retries");
 
         for(Object o : list) {

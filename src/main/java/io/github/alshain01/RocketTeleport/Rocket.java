@@ -17,10 +17,10 @@ public class Rocket implements ConfigurationSerializable {
 		this.type = type;
 	}
 	
-	protected Rocket(RocketType type, Location destination) {
+	/*protected Rocket(RocketType type, Location destination) {
 		this.type = type;
 		this.destination = destination;
-	}
+	}*/
 	
 	protected Rocket(double radius) {
 		this.type = RocketType.RANDOM;
@@ -30,7 +30,7 @@ public class Rocket implements ConfigurationSerializable {
     protected Rocket(Map<String, Object> rocket) {
         type = RocketType.valueOf((String)rocket.get("Type"));
         trigger = getLocationFromString((String)rocket.get("Trigger"));
-        if(!((String)rocket.get("Destination")).equals("null")) {
+        if(!(rocket.get("Destination")).equals("null")) {
             destination = getLocationFromString((String)rocket.get("Destination"));
         }
         radius = (Double)rocket.get("Radius");
@@ -88,11 +88,11 @@ public class Rocket implements ConfigurationSerializable {
 		return false;
 	}
 	
-	protected boolean setRadius(double radius) {
+	/*protected boolean setRadius(double radius) {
 		if(this.type == RocketType.RANDOM) {
 			this.radius = radius;
 			return true;
 		}
 		return false;
-	}
+	}*/
 }
