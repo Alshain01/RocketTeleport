@@ -218,7 +218,7 @@ public class LaunchPad implements Listener {
 		}
 
 		if(e.getAction() != Action.RIGHT_CLICK_BLOCK 
-				|| triggerTypes.contains(e.getClickedBlock().getType())) {
+				|| !triggerTypes.contains(e.getClickedBlock().getType())) {
 			return;
 		}
 
