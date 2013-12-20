@@ -1,6 +1,10 @@
 package io.github.alshain01.RocketTeleport;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
@@ -32,7 +36,7 @@ class LaunchPad implements Listener {
 	private final Set<UUID> destinationMode = new HashSet<UUID>();
 
     //Store a list of blocks that players should not be randomly teleported to.
-    private Set<Material> exclusions = new HashSet<Material>();
+    private final Set<Material> exclusions;
 
     private static final Set<Material> triggerTypes = new HashSet<Material>(Arrays.asList(
             Material.WOOD_BUTTON,
@@ -214,7 +218,7 @@ class LaunchPad implements Listener {
 		}
 
 		if(e.getAction() != Action.RIGHT_CLICK_BLOCK 
-				|| triggerTypes.contains(e.getClickedBlock().getType())) {
+				|| !triggerTypes.contains(e.getClickedBlock().getType())) {
 			return;
 		}
 
@@ -270,7 +274,7 @@ class LaunchPad implements Listener {
     private void onBlockBreak(BlockBreakEvent e) {
         if(launchpads.containsKey(e.getBlock().getLocation())) {
             launchpads.remove(e.getBlock().getLocation());
+            e.getPlayer().sendMessage("RocketTeleport Launchpad Destroyed.");
         }
-        e.getPlayer().sendMessage("RocketTeleport Launchpad Destroyed.");
     }
 }
