@@ -13,9 +13,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class RocketTeleport extends JavaPlugin {
-	LaunchPad launchPad;
-    CustomYML data = new CustomYML(this, "data.yml");
+class RocketTeleport extends JavaPlugin {
+	private LaunchPad launchPad;
+    private final CustomYML data = new CustomYML(this);
 
 	@Override
 	public void onEnable() {
@@ -55,12 +55,12 @@ public class RocketTeleport extends JavaPlugin {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if(!cmd.getName().equals("rocketteleport") || args.length < 1) {
+		if(!cmd.getName().equalsIgnoreCase("RocketTeleport") || args.length < 1) {
 			return false;
 		}
 
 		if(!(sender instanceof Player)) {
-			sender.sendMessage("RocketTeleport commands may not be used by the conosle.");
+			sender.sendMessage("RocketTeleport commands may not be used by the console.");
 			return true;
 		}
 		UUID player = ((Player)sender).getUniqueId(); 
@@ -83,7 +83,7 @@ public class RocketTeleport extends JavaPlugin {
 		
 		// Is the player creating a random cannon?
 		if(args[0].equalsIgnoreCase("random") && args.length < 2) {
-			sender.sendMessage("/rocketteleport random <Radius>");
+			sender.sendMessage("/RocketTeleport random <Radius>");
 			return true;
 		}
 		
