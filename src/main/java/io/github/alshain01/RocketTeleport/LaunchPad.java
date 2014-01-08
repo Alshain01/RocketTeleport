@@ -116,18 +116,12 @@ public class LaunchPad implements Listener {
 		@Override
 		public void run() {
 			Player player = Bukkit.getPlayer(this.player);
-			player.setVelocity(new Vector(0D, 0D, 0D));
 			Location landing = destination;
-			switch(rocket.getType()) {
-				case SOFT:
-                case RANDOM:
-					landing = destination.add(0,1,0);
-					break;
-				case HARD:
-					landing = destination.add(0, 75, 0);
-                    break;
+			if(rocket.getType() == RocketType.HARD) {
+                landing = destination.add(0, 75, 0);
 			}
 			player.teleport(landing, TeleportCause.PLUGIN);
+            player.setVelocity(new Vector(0D, 0D, 0D));
 		}
 	}
 
