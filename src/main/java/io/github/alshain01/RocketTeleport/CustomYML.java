@@ -38,19 +38,19 @@ import java.util.logging.Level;
  * 
  * @author bukkit.org
  */
-public final class CustomYML {
+final class CustomYML {
 	private static JavaPlugin plugin;
 	private final String dataFile;
 	private FileConfiguration customConfig = null;
 	private File customConfigFile = null;
 
 	// Construct a new CustomYML file
-	public CustomYML(JavaPlugin plugin, String dataFile) {
+	public CustomYML(JavaPlugin plugin) {
 		CustomYML.plugin = plugin;
-		this.dataFile = dataFile;
+		this.dataFile = "data.yml";
 	}
 
-	// Get's the custom config file.
+	// Gets the custom config file.
 	public FileConfiguration getConfig() {
 		if (customConfig == null) {
 			reload();
@@ -59,7 +59,7 @@ public final class CustomYML {
 	}
 
 	// Reloads the file to the MemorySection
-	public void reload() {
+	void reload() {
 		if (customConfigFile == null) {
 			customConfigFile = new File(plugin.getDataFolder(), dataFile);
 		}

@@ -29,7 +29,6 @@
 package io.github.alshain01.RocketTeleport;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -50,6 +49,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 
+@SuppressWarnings("ALL")
 public class MetricsLite {
 
     /**

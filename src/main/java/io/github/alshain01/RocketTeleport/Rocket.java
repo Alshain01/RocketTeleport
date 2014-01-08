@@ -7,27 +7,27 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Rocket implements ConfigurationSerializable {
+class Rocket implements ConfigurationSerializable {
 	private final RocketType type;
 	private Location trigger = null;
 	private Location destination = null;
 	private double radius = 0;
 	
-	protected Rocket(RocketType type) {
+	Rocket(RocketType type) {
 		this.type = type;
 	}
 	
-	/*protected Rocket(RocketType type, Location destination) {
+	/*Rocket(RocketType type, Location destination) {
 		this.type = type;
 		this.destination = destination;
 	}*/
 	
-	protected Rocket(double radius) {
+	Rocket(double radius) {
 		this.type = RocketType.RANDOM;
 		this.radius = radius;
 	}
 
-    protected Rocket(Map<String, Object> rocket) {
+    Rocket(Map<String, Object> rocket) {
         type = RocketType.valueOf((String)rocket.get("Type"));
         trigger = getLocationFromString((String)rocket.get("Trigger"));
         if(!(rocket.get("Destination")).equals("null")) {
@@ -60,27 +60,27 @@ public class Rocket implements ConfigurationSerializable {
         return rocket;
     }
 
-	protected RocketType getType() {
+	RocketType getType() {
 		return type;
 	}
 	
-	protected Location getTrigger() {
+	Location getTrigger() {
 		return trigger;
 	}
 	
-	protected Location getDestination() {
+	Location getDestination() {
 		return destination;
 	}
 	
-	protected double getRadius() {
+	double getRadius() {
 		return radius;
 	}
 	
-	protected void setTrigger(Location trigger) {
+	void setTrigger(Location trigger) {
 		this.trigger = trigger;
 	}
 	
-	protected boolean setDestination(Location destination) {
+	boolean setDestination(Location destination) {
 		if(this.type != RocketType.RANDOM) {
 			this.destination = destination;
 			return true;
@@ -88,7 +88,7 @@ public class Rocket implements ConfigurationSerializable {
 		return false;
 	}
 	
-	/*protected boolean setRadius(double radius) {
+	/*boolean setRadius(double radius) {
 		if(this.type == RocketType.RANDOM) {
 			this.radius = radius;
 			return true;

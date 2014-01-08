@@ -25,15 +25,15 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-public class LaunchPad implements Listener {
+class LaunchPad implements Listener {
 	//Stores a list of fully created and active rockets
-	private Map<Location, Rocket> launchpads = new ConcurrentHashMap<Location, Rocket>();
+	private final Map<Location, Rocket> launchpads = new ConcurrentHashMap<Location, Rocket>();
 
 	//Stores a list of partially created rockets
-	private Map<UUID, Rocket> partialLP = new ConcurrentHashMap<UUID, Rocket>();
+	private final Map<UUID, Rocket> partialLP = new ConcurrentHashMap<UUID, Rocket>();
 
 	//Stores a list of players who have created a rocket and need to set it's destination
-	private Set<UUID> destMode = new HashSet<UUID>();
+	private final Set<UUID> destinationMode = new HashSet<UUID>();
 
     //Store a list of blocks that players should not be randomly teleported to.
     private final Set<Material> exclusions;
@@ -46,7 +46,7 @@ public class LaunchPad implements Listener {
 
     private final int retries;
 
-    protected LaunchPad(ConfigurationSection config, Set<Material> exclusions, int retries) {
+    LaunchPad(ConfigurationSection config, Set<Material> exclusions, int retries) {
         Set<String> k = config.getKeys(false);
         for(String l : k) {
             launchpads.put(getLocationFromString(l), new Rocket(config.getConfigurationSection(l).getValues(false)));
@@ -55,50 +55,50 @@ public class LaunchPad implements Listener {
         this.retries = retries;
     }
 
-    protected LaunchPad(Set<Material> exclusions, int retries) {
+    LaunchPad(Set<Material> exclusions, int retries) {
         this.exclusions = exclusions;
         this.retries = retries;
     }
 
-    protected void write(ConfigurationSection config) {
+    void write(ConfigurationSection config) {
         for(Location l : launchpads.keySet()) {
             String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();
             config.set(loc, launchpads.get(l).serialize());
         }
     }
 
-    protected boolean hasPartialRocket(UUID player) {
+    boolean hasPartialRocket(UUID player) {
         return partialLP.containsKey(player);
     }
 
-    protected boolean cancelCreation(UUID player) {
+    boolean cancelCreation(UUID player) {
         boolean cancelled = false;
         if(partialLP.containsKey(player)) {
             partialLP.remove(player);
             cancelled = true;
         }
 
-        if(destMode.contains(player)) {
-            destMode.remove(player);
+        if(destinationMode.contains(player)) {
+            destinationMode.remove(player);
             cancelled = true;
         }
         return cancelled;
     }
 
-    protected void addPartialRocket(UUID player, Rocket rocket) {
+    void addPartialRocket(UUID player, Rocket rocket) {
         partialLP.put(player, rocket);
     }
 
-    protected void setLandMode(UUID player) {
-        destMode.add(player);
+    void setLandMode(UUID player) {
+        destinationMode.add(player);
     }
 
     /*
      * Runnable class for handling delayed teleport
      */
  	private class Teleport extends BukkitRunnable {
-		private String player;
-		private Rocket rocket;
+		private final String player;
+		private final Rocket rocket;
         private Location destination = null;
 		
 		/*private Teleport(String player, Rocket rocket) {
@@ -140,21 +140,21 @@ public class LaunchPad implements Listener {
         int count = 0;
         Block landing;
         do {
-            double xloc = (trigger.getX() - radius) + Math.random() * (radius*2);
-            double zloc = (trigger.getZ() - radius) + Math.random() * (radius*2);
-            Location loc = new Location(trigger.getWorld(), xloc, 0D, zloc);
+            double x = (trigger.getX() - radius) + Math.random() * (radius*2);
+            double z = (trigger.getZ() - radius) + Math.random() * (radius*2);
+            Location loc = new Location(trigger.getWorld(), x, 0D, z);
             landing = loc.getWorld().getHighestBlockAt(loc);
             count ++;
-        } while (!validType(landing.getType()) && count <= retries);
+        } while (invalidType(landing.getType()) && count <= retries);
         if(count > retries) { return null; }
         return landing.getLocation().add(0, 1, 0);
     }
 
-    private boolean validType(Material type) {
+    private boolean invalidType(Material type) {
         for(Material m : exclusions) {
-            if(type.equals(m)) { return false; }
+            if(type.equals(m)) { return true; }
         }
-        return true;
+        return false;
     }
 	
     /*
@@ -163,7 +163,7 @@ public class LaunchPad implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerQuit(PlayerQuitEvent e) {
 		partialLP.remove(e.getPlayer().getUniqueId());
-		destMode.remove(e.getPlayer().getUniqueId());
+		destinationMode.remove(e.getPlayer().getUniqueId());
 	}
 
     /*
@@ -184,20 +184,20 @@ public class LaunchPad implements Listener {
 				return;
 			}
 
-            Location dest;
+            Location destination;
             if(rocket.getType().equals(RocketType.RANDOM)) {
-                dest = getRandomLocation(rocket.getTrigger(), rocket.getRadius());
-                if(dest == null) {
+                destination = getRandomLocation(rocket.getTrigger(), rocket.getRadius());
+                if(destination == null) {
                     e.getPlayer().sendMessage("Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
             } else {
-                dest = rocket.getDestination();
+                destination = rocket.getDestination();
             }
 
 			e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.EXPLODE, 20, 0);
 			e.getPlayer().setVelocity(new Vector(0D, 10D, 0D));
-			new Teleport(e.getPlayer().getName(), rocket, dest).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 20 * 2);
+			new Teleport(e.getPlayer().getName(), rocket, destination).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 20 * 2);
 		}
 	}
 
@@ -241,7 +241,7 @@ public class LaunchPad implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onSetDestination(PlayerInteractEvent e) {
 		if(e.getAction() != Action.LEFT_CLICK_BLOCK
-				|| !destMode.contains(e.getPlayer().getUniqueId())
+				|| !destinationMode.contains(e.getPlayer().getUniqueId())
 				|| partialLP.get(e.getPlayer().getUniqueId()).getTrigger() == null) {
 			return;
 		}
@@ -251,11 +251,14 @@ public class LaunchPad implements Listener {
 		
 		Rocket rocket = partialLP.get(e.getPlayer().getUniqueId());
 		partialLP.remove(e.getPlayer().getUniqueId());
-		destMode.remove(e.getPlayer().getUniqueId());
-        rocket.setDestination(e.getClickedBlock().getLocation());
-		
-		launchpads.put(rocket.getTrigger(), rocket);
-		e.getPlayer().sendMessage("New rocket created.");
+		destinationMode.remove(e.getPlayer().getUniqueId());
+        if(rocket.setDestination(e.getClickedBlock().getLocation())) {
+		    launchpads.put(rocket.getTrigger(), rocket);
+		    e.getPlayer().sendMessage("New rocket created.");
+        } else {
+            e.getPlayer().sendMessage("There was an error setting the destination.");
+        }
+
 	}
 
     /*
