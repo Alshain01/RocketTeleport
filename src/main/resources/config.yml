@@ -15,3 +15,12 @@ Exclusions:
 #
 Metrics:
   Enabled: true
+#
+# Check for updates and notify the console or download and install (Check must be true to auto update)
+# ServerModsAPIKey is optional and can be found here https://dev.bukkit.org/home/servermods-apikey/
+# DO NOT SHARE WITH ANYONE!  The API key will only be uploaded to BukkitDev, not the author of this plugin.
+#
+Update:
+  Check: true
+  Download: false
+  ServerModsAPIKey: null
