@@ -13,7 +13,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-class RocketTeleport extends JavaPlugin {
+public class RocketTeleport extends JavaPlugin {
 	private LaunchPad launchPad;
     private CustomYML data;
 
