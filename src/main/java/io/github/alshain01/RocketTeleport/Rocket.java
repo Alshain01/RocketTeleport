@@ -43,7 +43,6 @@ class Rocket implements ConfigurationSerializable {
         for (int a = 0; a < 3; a++) {
             parsed[a] = Double.parseDouble(arg[a+1]);
         }
-
         return new Location (Bukkit.getWorld(arg[0]), parsed[0], parsed[1], parsed[2]);
     }
 
