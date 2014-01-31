@@ -6,37 +6,37 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import io.github.alshain01.rocketteleport.Updater.UpdateResult;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class RocketTeleport extends JavaPlugin {
 	private LaunchPad launchPad;
     private CustomYML data;
+    private Updater updater = null;
 
 	@Override
 	public void onEnable() {
         this.saveDefaultConfig();
         data = new CustomYML(this);
-
         ConfigurationSerialization.registerClass(Rocket.class);
-        List<?> list = this.getConfig().getList("Exclusions");
-        Set<Material> exclusions = new HashSet<Material>();
-        int retries = this.getConfig().getInt("Retries");
 
-        for(Object o : list) {
-            exclusions.add(Material.valueOf((String)o));
+        if (getConfig().getBoolean("Update.Check")) {
+            new UpdateScheduler().runTaskTimer(this, 0, 1728000);
+            getServer().getPluginManager().registerEvents(new UpdateListener(), this);
         }
-
-        if(data.getConfig().isConfigurationSection("LaunchPads")) {
-            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions, retries);
-        } else {
-            launchPad = new LaunchPad(exclusions, retries);
-        }
-		this.getServer().getPluginManager().registerEvents(launchPad, this);
 
         if(this.getConfig().getBoolean("Metrics.Enabled")) {
             try {
@@ -45,7 +45,31 @@ public class RocketTeleport extends JavaPlugin {
                 this.getLogger().warning("Metrics failed to start.");
             }
         }
+
+        new ServerEnabledTasks().run();
 	}
+
+    /*
+     * Initialize the launch pads after the worlds have loaded
+     */
+    protected void initialize() {
+        // Grab the list of materials to not teleport players to
+        List<?> list = this.getConfig().getList("Exclusions");
+        Set<Material> exclusions = new HashSet<Material>();
+        for(Object o : list) {
+            exclusions.add(Material.valueOf((String)o));
+        }
+
+        // Get the number of times to attempt to find a valid block.
+        int retries = this.getConfig().getInt("Retries");
+
+        if(data.getConfig().isConfigurationSection("LaunchPads")) {
+            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions, retries);
+        } else {
+            launchPad = new LaunchPad(exclusions, retries);
+        }
+        this.getServer().getPluginManager().registerEvents(launchPad, this);
+    }
 
     @Override
 	public void onDisable() {
@@ -125,4 +149,61 @@ public class RocketTeleport extends JavaPlugin {
         }
 		return false;
 	}
+
+    /*
+ * Tasks that must be run only after the entire sever has loaded. Runs on
+ * first server tick.
+ */
+    private class ServerEnabledTasks extends BukkitRunnable {
+        public void run() {
+            ((RocketTeleport)Bukkit.getPluginManager().getPlugin("RocketTeleport")).initialize();
+        }
+    }
+
+    /*
+     * Contains event listeners required for plugin maintenance.
+     */
+    private class UpdateListener implements Listener {
+        // Update listener
+        @EventHandler(ignoreCancelled = true)
+        private void onPlayerJoin(PlayerJoinEvent e) {
+            if(updater == null) { return; }
+            if (e.getPlayer().hasPermission("rocketteleport.admin.notifyupdate")) {
+                if(updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
+                    e.getPlayer().sendMessage(ChatColor.DARK_PURPLE
+                            + "The version of RocketTeleport that this server is running is out of date. "
+                            + "Please consider updating to the latest version at dev.bukkit.org/bukkit-plugins/rocketteleport/.");
+                } else if(updater.getResult() == UpdateResult.SUCCESS) {
+                    e.getPlayer().sendMessage("[RocketTeleport] " + ChatColor.DARK_PURPLE
+                            + "An update to RocketTeleport has been downloaded and will be installed when the server is reloaded.");
+                }
+            }
+        }
+    }
+
+    /*
+     * Handles update checking and downloading
+     */
+    private class UpdateScheduler extends BukkitRunnable {
+        @Override
+        public void run() {
+            // Update script
+            final String key = getConfig().getString("Update.ServerModsAPIKey");
+            final Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("RockeTeleport");
+            updater = (getConfig().getBoolean("Update.Download"))
+                    ? new Updater(plugin, 65024, getFile(), Updater.UpdateType.DEFAULT, key, true)
+                    : new Updater(plugin, 65024, getFile(), Updater.UpdateType.NO_DOWNLOAD, key, false);
+
+            if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
+                Bukkit.getServer().getConsoleSender()
+                        .sendMessage("[RocketTeleport] "	+ ChatColor.DARK_PURPLE
+                                + "The version of RocketTeleport that this server is running is out of date. "
+                                + "Please consider updating to the latest version at dev.bukkit.org/bukkit-plugins/rocketteleport/.");
+            } else if (updater.getResult() == UpdateResult.SUCCESS) {
+                Bukkit.getServer().getConsoleSender()
+                        .sendMessage("[RocketTeleport] "	+ ChatColor.DARK_PURPLE
+                                + "An update to RocketTeleport has been downloaded and will be installed when the server is reloaded.");
+            }
+        }
+    }
 }
