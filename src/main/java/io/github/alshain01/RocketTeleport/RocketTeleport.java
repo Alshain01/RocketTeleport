@@ -1,4 +1,4 @@
-package io.github.alshain01.RocketTeleport;
+package io.github.alshain01.rocketteleport;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -15,11 +15,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 class RocketTeleport extends JavaPlugin {
 	private LaunchPad launchPad;
-    private final CustomYML data = new CustomYML(this);
+    private CustomYML data;
 
 	@Override
 	public void onEnable() {
         this.saveDefaultConfig();
+        data = new CustomYML(this);
+
         ConfigurationSerialization.registerClass(Rocket.class);
         List<?> list = this.getConfig().getList("Exclusions");
         Set<Material> exclusions = new HashSet<Material>();

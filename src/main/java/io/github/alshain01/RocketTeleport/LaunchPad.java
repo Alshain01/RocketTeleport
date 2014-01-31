@@ -1,11 +1,6 @@
-package io.github.alshain01.RocketTeleport;
+package io.github.alshain01.rocketteleport;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,10 +22,10 @@ import org.bukkit.util.Vector;
 
 class LaunchPad implements Listener {
 	//Stores a list of fully created and active rockets
-	private final Map<Location, Rocket> launchpads = new ConcurrentHashMap<Location, Rocket>();
+	private final Map<Location, Rocket> launchpads = new HashMap<Location, Rocket>();
 
 	//Stores a list of partially created rockets
-	private final Map<UUID, Rocket> partialLP = new ConcurrentHashMap<UUID, Rocket>();
+	private final Map<UUID, Rocket> partialLP = new HashMap<UUID, Rocket>();
 
 	//Stores a list of players who have created a rocket and need to set it's destination
 	private final Set<UUID> destinationMode = new HashSet<UUID>();

@@ -26,7 +26,7 @@
  * either expressed or implied, of anybody else.
  */
 
-package io.github.alshain01.RocketTeleport;
+package io.github.alshain01.rocketteleport;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
