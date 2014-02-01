@@ -1,7 +1,6 @@
 package io.github.alshain01.rocketteleport;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -42,7 +41,8 @@ class LaunchPad implements Listener {
     LaunchPad(ConfigurationSection config, Set<Material> exclusions, int retries) {
         Set<String> k = config.getKeys(false);
         for(String l : k) {
-            launchpads.put(getLocationFromString(l), new Rocket(config.getConfigurationSection(l).getValues(false)));
+            Rocket r = new Rocket(config.getConfigurationSection(l).getValues(false));
+            launchpads.put(r.getTrigger().getLocation(), new Rocket(config.getConfigurationSection(l).getValues(false)));
         }
         this.exclusions = exclusions;
         this.retries = retries;
@@ -55,8 +55,8 @@ class LaunchPad implements Listener {
 
     void write(ConfigurationSection config) {
         for(Location l : launchpads.keySet()) {
-            String loc = l.getWorld().getName() + "," + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();
-            config.set(loc, launchpads.get(l).serialize());
+            Rocket r = launchpads.get(l);
+            config.set(r.getTrigger().toKey(), r.serialize());
         }
     }
 
@@ -118,17 +118,6 @@ class LaunchPad implements Listener {
 		}
 	}
 
-    private Location getLocationFromString(String s) {
-        String[] arg = s.split(",");
-        int[] parsed = new int[3];
-
-        for (int a = 0; a < 3; a++) {
-            parsed[a] = Integer.parseInt(arg[a + 1]);
-        }
-
-        return new Location (Bukkit.getWorld(arg[0]), parsed[0], parsed[1], parsed[2]);
-    }
-
     private Location getRandomLocation(Location landingArea, double radius) {
         int count = 0;
         Block landing;
@@ -175,19 +164,19 @@ class LaunchPad implements Listener {
             Player player = e.getPlayer();
 
 			if((int)player.getLocation().getY() < player.getWorld().getHighestBlockYAt(player.getLocation())) {
-                player.teleport(rocket.getDestination());
+                player.teleport(rocket.getDestination().getLocation());
 				return;
 			}
 
             Location destination;
             if(rocket.getType().equals(RocketType.RANDOM)) {
-                destination = getRandomLocation(rocket.getDestination(), rocket.getRadius());
+                destination = getRandomLocation(rocket.getDestination().getLocation(), rocket.getRadius());
                 if(destination == null) {
                     player.sendMessage(ChatColor.RED + "Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
             } else {
-                destination = rocket.getDestination();
+                destination = rocket.getDestination().getLocation();
             }
 
             player.getWorld().playSound(player.getLocation(), Sound.EXPLODE, 20, 0);
@@ -242,7 +231,7 @@ class LaunchPad implements Listener {
 		partialLP.remove(e.getPlayer().getUniqueId());
 		destinationMode.remove(e.getPlayer().getUniqueId());
         rocket.setDestination(e.getClickedBlock().getLocation());
-        launchpads.put(rocket.getTrigger(), rocket);
+        launchpads.put(rocket.getTrigger().getLocation(), rocket);
         e.getPlayer().sendMessage(ChatColor.GREEN + "New rocket created.");
 	}
 

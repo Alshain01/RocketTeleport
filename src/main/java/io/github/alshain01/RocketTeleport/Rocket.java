@@ -14,7 +14,7 @@ class Rocket implements ConfigurationSerializable {
 	private RocketLocation destination = null;
 	private double radius = 0;
 
-    private class RocketLocation {
+    protected class RocketLocation {
         final String world;
         final double coords[] = new double[3];
 
@@ -37,6 +37,10 @@ class Rocket implements ConfigurationSerializable {
         @Override
         public String toString() {
             return world + "," + coords[0] + "," + coords[1] + "," + coords[2];
+        }
+
+        public String toKey() {
+            return world + "," + (int)coords[0] + "," + (int)coords[1] + "," + (int)coords[2];
         }
 
         public Location getLocation() {
@@ -83,10 +87,10 @@ class Rocket implements ConfigurationSerializable {
 		return type;
 	}
 	
-	Location getTrigger() { return trigger.getLocation(); }
-	
-	Location getDestination() {	return destination.getLocation(); }
-	
+	RocketLocation getTrigger() { return trigger; }
+
+	RocketLocation getDestination() {	return destination; }
+
 	double getRadius() {
 		return radius;
 	}
