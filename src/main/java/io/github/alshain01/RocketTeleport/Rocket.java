@@ -6,13 +6,44 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 class Rocket implements ConfigurationSerializable {
 	private final RocketType type;
-	private Location trigger = null;
-	private Location destination = null;
+	private RocketLocation trigger = null;
+	private RocketLocation destination = null;
 	private double radius = 0;
-	
+
+    private class RocketLocation {
+        final String world;
+        final double coords[] = new double[3];
+
+        private RocketLocation(Location location) {
+            coords[0] = location.getX();
+            coords[1] = location.getY();
+            coords[2] = location.getZ();
+            world = location.getWorld().getName();
+        }
+
+        private RocketLocation(String location) {
+            String[] arg = location.split(",");
+
+            world = arg[0];
+            for (int a = 0; a < 3; a++) {
+                coords[a] = Double.parseDouble(arg[a+1]);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return world + "," + coords[0] + "," + coords[1] + "," + coords[2];
+        }
+
+        public Location getLocation() {
+            return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2]);
+        }
+    }
+
 	Rocket(RocketType type) {
 		this.type = type;
 	}
@@ -29,36 +60,21 @@ class Rocket implements ConfigurationSerializable {
 
     Rocket(Map<String, Object> rocket) {
         type = RocketType.valueOf((String)rocket.get("Type"));
-        trigger = getLocationFromString((String)rocket.get("Trigger"));
+        trigger = new RocketLocation((String)rocket.get("Trigger"));
         if(((String)rocket.get("Destination")).equals("null")) {
             // Upgrade from v1.1.0 and earlier where Random did not have a destination
-            destination = getLocationFromString((String)rocket.get("Trigger"));
+            destination = new RocketLocation((String)rocket.get("Trigger"));
         } else {
-            destination = getLocationFromString((String)rocket.get("Destination"));
+            destination = new RocketLocation((String)rocket.get("Destination"));
         }
         radius = (Double)rocket.get("Radius");
-    }
-
-    private Location getLocationFromString(String s) {
-        String[] arg = s.split(",");
-        double[] parsed = new double[3];
-
-        for (int a = 0; a < 3; a++) {
-            parsed[a] = Double.parseDouble(arg[a+1]);
-        }
-        return new Location (Bukkit.getWorld(arg[0]), parsed[0], parsed[1], parsed[2]);
     }
 
     public Map<String, Object> serialize() {
         Map<String, Object> rocket = new HashMap<String, Object>();
         rocket.put("Type", type.toString());
-        rocket.put("Trigger", trigger.getWorld().getName() + "," + trigger.getX() + "," + trigger.getY() + "," + trigger.getZ());
-        if(destination != null) {
-            rocket.put("Destination",  destination.getWorld().getName() + "," + destination.getX() + "," + destination.getY() + "," + destination.getZ());
-        } else {
-            // Upgrade from v1.1.0 and earlier where Random did not have a destination
-            rocket.put("Destination",  trigger.getWorld().getName() + "," + trigger.getX() + "," + trigger.getY() + "," + trigger.getZ());
-        }
+        rocket.put("Trigger", trigger.toString());
+        rocket.put("Destination",  destination.toString());
         rocket.put("Radius", radius);
         return rocket;
     }
@@ -67,23 +83,17 @@ class Rocket implements ConfigurationSerializable {
 		return type;
 	}
 	
-	Location getTrigger() {
-		return trigger;
-	}
+	Location getTrigger() { return trigger.getLocation(); }
 	
-	Location getDestination() {
-		return destination;
-	}
+	Location getDestination() {	return destination.getLocation(); }
 	
 	double getRadius() {
 		return radius;
 	}
 	
-	void setTrigger(Location trigger) {
-		this.trigger = trigger;
-	}
+	void setTrigger(Location trigger) { this.trigger = new RocketLocation(trigger); }
 	
-	void setDestination(Location destination) {	this.destination = destination; }
+	void setDestination(Location destination) {	this.destination = new RocketLocation(destination); }
 	
 	/*boolean setRadius(double radius) {
 		if(this.type == RocketType.RANDOM) {
