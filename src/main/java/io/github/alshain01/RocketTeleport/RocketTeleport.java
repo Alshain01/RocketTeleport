@@ -97,13 +97,13 @@ public class RocketTeleport extends JavaPlugin {
 				return false;
 			}
 			launchPad.setLandMode(player);
-			sender.sendMessage("Left click the landing zone.");
+			sender.sendMessage(ChatColor.BLUE + "Left click the landing zone.");
 			return true;
 		}
 
 		// Is the player attempting to create a cannon while one is already in the queue?
 		if(!args[0].equalsIgnoreCase("cancel") && launchPad.hasPartialRocket(player)) {
-			sender.sendMessage("You already have a launch pad pending, use /rt land to complete it.");
+			sender.sendMessage(ChatColor.RED + "You already have a launch pad pending, use /rt land to complete it.");
             return true;
 		}
 		
@@ -118,12 +118,12 @@ public class RocketTeleport extends JavaPlugin {
 			try {
 				radius = Double.valueOf(args[1]);
 			} catch(NumberFormatException ex) {
-				sender.sendMessage("The radius is invalid.");
+				sender.sendMessage(ChatColor.RED + "The radius is invalid.");
 				return true;
 			}
 			
 			launchPad.addPartialRocket(player, new Rocket(radius));
-			sender.sendMessage("Right click the button or plate you wish to use as a rocket trigger." );
+			sender.sendMessage(ChatColor.BLUE + "Right click the button or plate you wish to use as a rocket trigger." );
 			return true;
 		}
 		
@@ -133,18 +133,18 @@ public class RocketTeleport extends JavaPlugin {
 	
 		if(args[0].equalsIgnoreCase("soft")) {
 			launchPad.addPartialRocket(player, new Rocket(RocketType.SOFT));
-			sender.sendMessage("Right click the button or plate you wish to use as a rocket trigger.");
+			sender.sendMessage(ChatColor.BLUE + "Right click the button or plate you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("hard")) {
 			launchPad.addPartialRocket(player, new Rocket(RocketType.HARD));
-			sender.sendMessage("Right click the button or plate you wish to use as a rocket trigger.");
+			sender.sendMessage(ChatColor.BLUE + "Right click the button or plate you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("cancel")) {
             if(launchPad.cancelCreation(player)) {
-                sender.sendMessage("Rocket LaunchPad creation canceled.");
+                sender.sendMessage(ChatColor.BLUE + "Rocket LaunchPad creation canceled.");
                 return true;
             }
-            sender.sendMessage("There is no pending LaunchPad creation.");
+            sender.sendMessage(ChatColor.RED + "There is no pending LaunchPad creation.");
             return true;
         }
 		return false;
@@ -189,10 +189,10 @@ public class RocketTeleport extends JavaPlugin {
         public void run() {
             // Update script
             final String key = getConfig().getString("Update.ServerModsAPIKey");
-            final Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("RockeTeleport");
+            final Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport");
             updater = (getConfig().getBoolean("Update.Download"))
-                    ? new Updater(plugin, 65024, getFile(), Updater.UpdateType.DEFAULT, key, true)
-                    : new Updater(plugin, 65024, getFile(), Updater.UpdateType.NO_DOWNLOAD, key, false);
+                    ? new Updater(plugin, 70281, getFile(), Updater.UpdateType.DEFAULT, key, true)
+                    : new Updater(plugin, 70281, getFile(), Updater.UpdateType.NO_DOWNLOAD, key, false);
 
             if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
                 Bukkit.getServer().getConsoleSender()

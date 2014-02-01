@@ -2,10 +2,7 @@ package io.github.alshain01.rocketteleport;
 
 import java.util.*;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -131,13 +128,13 @@ class LaunchPad implements Listener {
         return new Location (Bukkit.getWorld(arg[0]), parsed[0], parsed[1], parsed[2]);
     }
 
-    private Location getRandomLocation(Location trigger, double radius) {
+    private Location getRandomLocation(Location landingArea, double radius) {
         int count = 0;
         Block landing;
         do {
-            double x = (trigger.getX() - radius) + Math.random() * (radius*2);
-            double z = (trigger.getZ() - radius) + Math.random() * (radius*2);
-            Location loc = new Location(trigger.getWorld(), x, 0D, z);
+            double x = (landingArea.getX() - radius) + Math.random() * (radius*2);
+            double z = (landingArea.getZ() - radius) + Math.random() * (radius*2);
+            Location loc = new Location(landingArea.getWorld(), x, 0D, z);
             landing = loc.getWorld().getHighestBlockAt(loc);
             count ++;
         } while (invalidType(landing.getType()) && count <= retries);
@@ -181,9 +178,9 @@ class LaunchPad implements Listener {
 
             Location destination;
             if(rocket.getType().equals(RocketType.RANDOM)) {
-                destination = getRandomLocation(rocket.getTrigger(), rocket.getRadius());
+                destination = getRandomLocation(rocket.getDestination(), rocket.getRadius());
                 if(destination == null) {
-                    e.getPlayer().sendMessage("Failed to locate suitable destination after " + retries +" attempts.");
+                    e.getPlayer().sendMessage(ChatColor.RED + "Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
             } else {
@@ -218,16 +215,9 @@ class LaunchPad implements Listener {
 		partialLP.remove(e.getPlayer().getUniqueId());
         rocket.setTrigger(e.getClickedBlock().getLocation());
 		
-		// The rocket is complete
-		if(rocket.getType() == RocketType.RANDOM) {
-			launchpads.put(rocket.getTrigger(), rocket);
-			e.getPlayer().sendMessage("New random rocket created.");
-			return;
-		}
-		
 		// The rocket still needs a destination
 		partialLP.put(e.getPlayer().getUniqueId(), rocket);
-		e.getPlayer().sendMessage("Trigger location set, use /rt land to create landing zone.");
+		e.getPlayer().sendMessage(ChatColor.BLUE + "Trigger location set, use /rt land to create landing zone.");
 	}
 
     /*
@@ -247,13 +237,9 @@ class LaunchPad implements Listener {
 		Rocket rocket = partialLP.get(e.getPlayer().getUniqueId());
 		partialLP.remove(e.getPlayer().getUniqueId());
 		destinationMode.remove(e.getPlayer().getUniqueId());
-        if(rocket.setDestination(e.getClickedBlock().getLocation())) {
-		    launchpads.put(rocket.getTrigger(), rocket);
-		    e.getPlayer().sendMessage("New rocket created.");
-        } else {
-            e.getPlayer().sendMessage("There was an error setting the destination.");
-        }
-
+        rocket.setDestination(e.getClickedBlock().getLocation());
+        launchpads.put(rocket.getTrigger(), rocket);
+        e.getPlayer().sendMessage(ChatColor.BLUE + "New rocket created.");
 	}
 
     /*
@@ -263,7 +249,7 @@ class LaunchPad implements Listener {
     private void onBlockBreak(BlockBreakEvent e) {
         if(launchpads.containsKey(e.getBlock().getLocation())) {
             launchpads.remove(e.getBlock().getLocation());
-            e.getPlayer().sendMessage("RocketTeleport Launchpad Destroyed.");
+            e.getPlayer().sendMessage(ChatColor.BLUE + "RocketTeleport Launchpad Destroyed.");
         }
     }
 }

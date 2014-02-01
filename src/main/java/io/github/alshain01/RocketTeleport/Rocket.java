@@ -30,7 +30,10 @@ class Rocket implements ConfigurationSerializable {
     Rocket(Map<String, Object> rocket) {
         type = RocketType.valueOf((String)rocket.get("Type"));
         trigger = getLocationFromString((String)rocket.get("Trigger"));
-        if(!(rocket.get("Destination")).equals("null")) {
+        if(((String)rocket.get("Destination")).equals("null")) {
+            // Upgrade from v1.1.0 and earlier where Random did not have a destination
+            destination = getLocationFromString((String)rocket.get("Trigger"));
+        } else {
             destination = getLocationFromString((String)rocket.get("Destination"));
         }
         radius = (Double)rocket.get("Radius");
@@ -53,7 +56,8 @@ class Rocket implements ConfigurationSerializable {
         if(destination != null) {
             rocket.put("Destination",  destination.getWorld().getName() + "," + destination.getX() + "," + destination.getY() + "," + destination.getZ());
         } else {
-            rocket.put("Destination", "null");
+            // Upgrade from v1.1.0 and earlier where Random did not have a destination
+            rocket.put("Destination",  trigger.getWorld().getName() + "," + trigger.getX() + "," + trigger.getY() + "," + trigger.getZ());
         }
         rocket.put("Radius", radius);
         return rocket;
@@ -79,13 +83,7 @@ class Rocket implements ConfigurationSerializable {
 		this.trigger = trigger;
 	}
 	
-	boolean setDestination(Location destination) {
-		if(this.type != RocketType.RANDOM) {
-			this.destination = destination;
-			return true;
-		}
-		return false;
-	}
+	void setDestination(Location destination) {	this.destination = destination; }
 	
 	/*boolean setRadius(double radius) {
 		if(this.type == RocketType.RANDOM) {
