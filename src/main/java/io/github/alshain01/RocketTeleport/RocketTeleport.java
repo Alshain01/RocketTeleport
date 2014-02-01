@@ -97,7 +97,7 @@ public class RocketTeleport extends JavaPlugin {
 				return false;
 			}
 			launchPad.setLandMode(player);
-			sender.sendMessage(ChatColor.BLUE + "Left click the landing zone.");
+			sender.sendMessage(ChatColor.AQUA + "Left click the landing zone.");
 			return true;
 		}
 
@@ -123,7 +123,7 @@ public class RocketTeleport extends JavaPlugin {
 			}
 			
 			launchPad.addPartialRocket(player, new Rocket(radius));
-			sender.sendMessage(ChatColor.BLUE + "Right click the button or plate you wish to use as a rocket trigger." );
+			sender.sendMessage(ChatColor.AQUA + "Right click the button or plate you wish to use as a rocket trigger." );
 			return true;
 		}
 		
@@ -133,15 +133,15 @@ public class RocketTeleport extends JavaPlugin {
 	
 		if(args[0].equalsIgnoreCase("soft")) {
 			launchPad.addPartialRocket(player, new Rocket(RocketType.SOFT));
-			sender.sendMessage(ChatColor.BLUE + "Right click the button or plate you wish to use as a rocket trigger.");
+			sender.sendMessage(ChatColor.AQUA + "Right click the button or plate you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("hard")) {
 			launchPad.addPartialRocket(player, new Rocket(RocketType.HARD));
-			sender.sendMessage(ChatColor.BLUE + "Right click the button or plate you wish to use as a rocket trigger.");
+			sender.sendMessage(ChatColor.AQUA + "Right click the button or plate you wish to use as a rocket trigger.");
 			return true;
 		} else if (args[0].equalsIgnoreCase("cancel")) {
             if(launchPad.cancelCreation(player)) {
-                sender.sendMessage(ChatColor.BLUE + "Rocket LaunchPad creation canceled.");
+                sender.sendMessage(ChatColor.DARK_RED + "Rocket LaunchPad creation canceled.");
                 return true;
             }
             sender.sendMessage(ChatColor.RED + "There is no pending LaunchPad creation.");

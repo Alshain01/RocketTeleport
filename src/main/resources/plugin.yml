@@ -14,3 +14,6 @@ permission:
   rocketteleport.command:
     description: Allows access to the rocketteleport command.
     default: op
+  rocketteleport.admin.notifyupdate
+    description: Notifies players when an update to RocketTeleport is available.
+    default: op

@@ -1,6 +1,7 @@
 package io.github.alshain01.rocketteleport;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -171,8 +172,10 @@ class LaunchPad implements Listener {
 
 		if(launchpads.containsKey(e.getClickedBlock().getLocation())) {
 			Rocket rocket = launchpads.get(e.getClickedBlock().getLocation());
-			if(e.getPlayer().getLocation().getY() < e.getPlayer().getWorld().getHighestBlockYAt(e.getPlayer().getLocation())) {
-				e.getPlayer().teleport(rocket.getDestination());
+            Player player = e.getPlayer();
+
+			if((int)player.getLocation().getY() < player.getWorld().getHighestBlockYAt(player.getLocation())) {
+                player.teleport(rocket.getDestination());
 				return;
 			}
 
@@ -180,16 +183,17 @@ class LaunchPad implements Listener {
             if(rocket.getType().equals(RocketType.RANDOM)) {
                 destination = getRandomLocation(rocket.getDestination(), rocket.getRadius());
                 if(destination == null) {
-                    e.getPlayer().sendMessage(ChatColor.RED + "Failed to locate suitable destination after " + retries +" attempts.");
+                    player.sendMessage(ChatColor.RED + "Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
             } else {
                 destination = rocket.getDestination();
             }
 
-			e.getPlayer().getWorld().playSound(e.getPlayer().getLocation(), Sound.EXPLODE, 20, 0);
-			e.getPlayer().setVelocity(new Vector(0D, 10D, 0D));
-			new Teleport(e.getPlayer().getName(), rocket, destination).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 20 * 2);
+            player.getWorld().playSound(player.getLocation(), Sound.EXPLODE, 20, 0);
+            player.teleport(player.getLocation().add(0,1,0)); // Prevents player from getting "stuck" on pressure plate
+            player.setVelocity(new Vector(0D, 10D, 0D));
+			new Teleport(player.getName(), rocket, destination).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 40);
 		}
 	}
 
@@ -217,7 +221,7 @@ class LaunchPad implements Listener {
 		
 		// The rocket still needs a destination
 		partialLP.put(e.getPlayer().getUniqueId(), rocket);
-		e.getPlayer().sendMessage(ChatColor.BLUE + "Trigger location set, use /rt land to create landing zone.");
+		e.getPlayer().sendMessage(ChatColor.AQUA + "Trigger location set, use " + ChatColor.GOLD + "/rt land" + ChatColor.AQUA + " to create landing zone.");
 	}
 
     /*
@@ -239,7 +243,7 @@ class LaunchPad implements Listener {
 		destinationMode.remove(e.getPlayer().getUniqueId());
         rocket.setDestination(e.getClickedBlock().getLocation());
         launchpads.put(rocket.getTrigger(), rocket);
-        e.getPlayer().sendMessage(ChatColor.BLUE + "New rocket created.");
+        e.getPlayer().sendMessage(ChatColor.GREEN + "New rocket created.");
 	}
 
     /*
@@ -249,7 +253,7 @@ class LaunchPad implements Listener {
     private void onBlockBreak(BlockBreakEvent e) {
         if(launchpads.containsKey(e.getBlock().getLocation())) {
             launchpads.remove(e.getBlock().getLocation());
-            e.getPlayer().sendMessage(ChatColor.BLUE + "RocketTeleport Launchpad Destroyed.");
+            e.getPlayer().sendMessage(ChatColor.DARK_RED + "RocketTeleport Launchpad Destroyed.");
         }
     }
 }
