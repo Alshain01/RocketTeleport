@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import io.github.alshain01.flags.*;
+import io.github.alshain01.flags.System;
 import io.github.alshain01.rocketteleport.Updater.UpdateResult;
 
 import org.bukkit.Bukkit;
@@ -27,7 +29,7 @@ public class RocketTeleport extends JavaPlugin {
     private CustomYML data;
     private Updater updater = null;
 
-	@Override
+    @Override
 	public void onEnable() {
         this.saveDefaultConfig();
         data = new CustomYML(this);
@@ -44,6 +46,14 @@ public class RocketTeleport extends JavaPlugin {
             } catch (IOException ex) {
                 this.getLogger().warning("Metrics failed to start.");
             }
+        }
+
+        // Register Non-Player Flags
+        if (getServer().getPluginManager().isPluginEnabled("Flags")) {
+            getLogger().info("Enabling Flags Integration");
+
+            // Connect to the data file and register the flags
+            Flags.getRegistrar().register(new ModuleYML(this, "flags.yml"), "Player");
         }
 
         new ServerEnabledTasks().run();

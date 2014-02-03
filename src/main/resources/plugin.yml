@@ -4,6 +4,7 @@ description: ${project.description}
 author: ${project.author}
 website: ${project.url}
 main: ${project.main}
+softdepend: [Flags]
 commands:
   rocketteleport:
     description: RocketTeleport command

@@ -1,0 +1,13 @@
+Flag:
+  RTCreateRocket:
+    Description: 'Allows players to create a RocketTeleport trigger in the area.'
+    Default: false
+    Player: true
+    AreaMessage: '&cYou are not allowed to create rockets in &6{Owner}&c''s {AreaType} area.'
+    WorldMessage: '&cYou are not allowed to create rockets in &6{World}&c.'
+  RTSetLanding:
+    Description: 'Allows players to create a RocketTeleport landing zone in the area.'
+    Default: false
+    Player: true
+    AreaMessage: '&cYou are not allowed to set landing zones in &6{Owner}&c''s {AreaType} area.'
+    WorldMessage: '&cYou are not allowed to set landing zones in &6{World}&c.'

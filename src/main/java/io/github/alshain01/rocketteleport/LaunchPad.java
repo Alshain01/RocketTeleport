@@ -2,6 +2,9 @@ package io.github.alshain01.rocketteleport;
 
 import java.util.*;
 
+import io.github.alshain01.flags.*;
+import io.github.alshain01.flags.System;
+import io.github.alshain01.flags.area.Area;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -30,6 +33,10 @@ class LaunchPad implements Listener {
     //Store a list of blocks that players should not be randomly teleported to.
     private final Set<Material> exclusions;
 
+    // Flags need to be Objects to guard against cases where
+    // The Flags plugin in is not installed.  We will cast them back later.
+    private Object createFlag = null, landFlag = null;
+
     private static final Set<Material> triggerTypes = new HashSet<Material>(Arrays.asList(
             Material.WOOD_BUTTON,
             Material.WOOD_PLATE,
@@ -46,11 +53,13 @@ class LaunchPad implements Listener {
         }
         this.exclusions = exclusions;
         this.retries = retries;
+        if(Bukkit.getPluginManager().isPluginEnabled("Flags")) { initFlags(); }
     }
 
     LaunchPad(Set<Material> exclusions, int retries) {
         this.exclusions = exclusions;
         this.retries = retries;
+        if(Bukkit.getPluginManager().isPluginEnabled("Flags")) { initFlags(); }
     }
 
     void write(ConfigurationSection config) {
@@ -58,6 +67,11 @@ class LaunchPad implements Listener {
             Rocket r = launchpads.get(l);
             config.set(r.getTrigger().toKey(), r.serialize());
         }
+    }
+
+    void initFlags() {
+        landFlag = Flags.getRegistrar().getFlag("RTSetLanding");
+        createFlag = Flags.getRegistrar().getFlag("RTCreateRocket");
     }
 
     boolean hasPartialRocket(UUID player) {
@@ -91,7 +105,6 @@ class LaunchPad implements Listener {
      */
  	private class Teleport extends BukkitRunnable {
 		private final String player;
-		private final Rocket rocket;
         private Location destination = null;
 		
 		/*private Teleport(String player, Rocket rocket) {
@@ -100,21 +113,16 @@ class LaunchPad implements Listener {
             this.destination = rocket.getDestination();
         }*/
 
-        private Teleport(String player, Rocket rocket, Location destination) {
+        private Teleport(String player, Location destination) {
             this.player = player;
-            this.rocket = rocket;
             this.destination = destination;
         }
 		
 		@Override
 		public void run() {
 			Player player = Bukkit.getPlayer(this.player);
-			Location landing = destination;
-			if(rocket.getType() == RocketType.HARD) {
-                landing = destination.add(0, 75, 0);
-			}
-			player.teleport(landing, TeleportCause.PLUGIN);
             player.setVelocity(new Vector(0D, 0D, 0D));
+			player.teleport(destination, TeleportCause.PLUGIN);
 		}
 	}
 
@@ -168,21 +176,23 @@ class LaunchPad implements Listener {
 				return;
 			}
 
-            Location destination;
+            Location destination = rocket.getDestination().getLocation();
             if(rocket.getType().equals(RocketType.RANDOM)) {
-                destination = getRandomLocation(rocket.getDestination().getLocation(), rocket.getRadius());
+                destination = getRandomLocation(destination, rocket.getRadius());
                 if(destination == null) {
                     player.sendMessage(ChatColor.RED + "Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
-            } else {
-                destination = rocket.getDestination().getLocation();
+            }
+
+            if(rocket.getType().equals(RocketType.HARD)) {
+                destination = destination.add(0D, 75D, 0D);
             }
 
             player.getWorld().playSound(player.getLocation(), Sound.EXPLODE, 20, 0);
-            player.teleport(player.getLocation().add(0,1,0)); // Prevents player from getting "stuck" on pressure plate
+            player.teleport(player.getLocation().add(0D,1D,0D)); // Prevents player from getting "stuck" on pressure plate
             player.setVelocity(new Vector(0D, 10D, 0D));
-			new Teleport(player.getName(), rocket, destination).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 40);
+			new Teleport(player.getName(), destination).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 40);
 		}
 	}
 
@@ -191,8 +201,10 @@ class LaunchPad implements Listener {
      */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onCreateRocket(PlayerInteractEvent e) {
-		if(!partialLP.containsKey(e.getPlayer().getUniqueId())
-				|| partialLP.get(e.getPlayer().getUniqueId()).getTrigger() != null) {
+        Player player = e.getPlayer();
+
+		if(!partialLP.containsKey(player.getUniqueId())
+				|| partialLP.get(player.getUniqueId()).getTrigger() != null) {
 			return;
 		}
 
@@ -201,16 +213,27 @@ class LaunchPad implements Listener {
 			return;
 		}
 
+        // Check the flag
+        if(createFlag != null) {
+            Flag flag = (Flag)createFlag;
+            Area area = System.getActive().getAreaAt(e.getClickedBlock().getLocation());
+
+            if(!player.hasPermission(flag.getBypassPermission()) && !area.hasTrust(flag, player)) {
+                player.sendMessage(area.getMessage(flag, player.getName()));
+                return;
+            }
+        }
+
 		// Don't need to activate the button.
 		e.setCancelled(true);
 		
-		Rocket rocket = partialLP.get(e.getPlayer().getUniqueId());
-		partialLP.remove(e.getPlayer().getUniqueId());
+		Rocket rocket = partialLP.get(player.getUniqueId());
+		partialLP.remove(player.getUniqueId());
         rocket.setTrigger(e.getClickedBlock().getLocation());
 		
 		// The rocket still needs a destination
-		partialLP.put(e.getPlayer().getUniqueId(), rocket);
-		e.getPlayer().sendMessage(ChatColor.AQUA + "Trigger location set, use " + ChatColor.GOLD + "/rt land" + ChatColor.AQUA + " to create landing zone.");
+		partialLP.put(player.getUniqueId(), rocket);
+        player.sendMessage(ChatColor.AQUA + "Trigger location set, use " + ChatColor.GOLD + "/rt land" + ChatColor.AQUA + " to create landing zone.");
 	}
 
     /*
@@ -218,21 +241,35 @@ class LaunchPad implements Listener {
      */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	private void onSetDestination(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+
 		if(e.getAction() != Action.LEFT_CLICK_BLOCK
-				|| !destinationMode.contains(e.getPlayer().getUniqueId())
-				|| partialLP.get(e.getPlayer().getUniqueId()).getTrigger() == null) {
+				|| !destinationMode.contains(player.getUniqueId())
+				|| partialLP.get(player.getUniqueId()).getTrigger() == null) {
 			return;
 		}
+
+        // Check the flag
+        if(landFlag != null) {
+            Flag flag = (Flag)landFlag;
+            Area area = System.getActive().getAreaAt(e.getClickedBlock().getLocation());
+
+            if(!player.hasPermission(flag.getBypassPermission()) && !area.hasTrust(flag, player)) {
+                player.sendMessage(area.getMessage(flag, player.getName()));
+                destinationMode.remove(player.getUniqueId());
+                return;
+            }
+        }
 
 		// If the block is something that can be interacted with, don't.
 		e.setCancelled(true);
 		
-		Rocket rocket = partialLP.get(e.getPlayer().getUniqueId());
-		partialLP.remove(e.getPlayer().getUniqueId());
-		destinationMode.remove(e.getPlayer().getUniqueId());
+		Rocket rocket = partialLP.get(player.getUniqueId());
+		partialLP.remove(player.getUniqueId());
+		destinationMode.remove(player.getUniqueId());
         rocket.setDestination(e.getClickedBlock().getLocation());
         launchpads.put(rocket.getTrigger().getLocation(), rocket);
-        e.getPlayer().sendMessage(ChatColor.GREEN + "New rocket created.");
+        player.sendMessage(ChatColor.GREEN + "New rocket created.");
 	}
 
     /*

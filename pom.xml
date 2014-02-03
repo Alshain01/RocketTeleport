@@ -18,6 +18,11 @@
 			<id>bukkit-repo</id>
 			<url>http://repo.bukkit.org/content/groups/public/</url>
 		</repository>
+
+        <repository>
+            <id>flags-repo</id>
+            <url>http://pages.suddenlink.net/alshain01/flags/repository</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
@@ -26,6 +31,19 @@
 			<artifactId>bukkit</artifactId>
 			<version>1.7.2-R0.2</version>
 		</dependency>
+
+        <dependency>
+            <groupId>io.github.alshain01.flags</groupId>
+            <artifactId>Flags</artifactId>
+            <version>RELEASE</version>
+            <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 	</dependencies>
 	
 	<build>
