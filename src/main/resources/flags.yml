@@ -11,3 +11,9 @@ Flag:
     Player: true
     AreaMessage: '&cYou are not allowed to set landing zones in &6{Owner}&c''s {AreaType} area.'
     WorldMessage: '&cYou are not allowed to set landing zones in &6{World}&c.'
+  RTUseRocket:
+    Description: 'Allows players to use a rockets in the area.'
+    Default: true
+    Player: true
+    AreaMessage: '&cYou are not allowed to use rockets in &6{Owner}&c''s {AreaType} area.'
+    WorldMessage: '&cYou are not allowed to use rockets in &6{World}&c.'

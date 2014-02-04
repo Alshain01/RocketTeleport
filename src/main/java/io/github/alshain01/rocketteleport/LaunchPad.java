@@ -35,7 +35,7 @@ class LaunchPad implements Listener {
 
     // Flags need to be Objects to guard against cases where
     // The Flags plugin in is not installed.  We will cast them back later.
-    private Object createFlag = null, landFlag = null;
+    private Object createFlag = null, landFlag = null, useFlag = null;
 
     private static final Set<Material> triggerTypes = new HashSet<Material>(Arrays.asList(
             Material.WOOD_BUTTON,
@@ -72,6 +72,7 @@ class LaunchPad implements Listener {
     void initFlags() {
         landFlag = Flags.getRegistrar().getFlag("RTSetLanding");
         createFlag = Flags.getRegistrar().getFlag("RTCreateRocket");
+        useFlag = Flags.getRegistrar().getFlag("RTUseRocket");
     }
 
     boolean hasPartialRocket(UUID player) {
@@ -159,7 +160,7 @@ class LaunchPad implements Listener {
     /*
      * Handles a player using a fully configured rocket
      */
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	private void onActivateRocket(PlayerInteractEvent e) {
 		if(e.getAction() != Action.RIGHT_CLICK_BLOCK
                 && e.getAction() != Action.PHYSICAL
@@ -167,9 +168,22 @@ class LaunchPad implements Listener {
 			return;
 		}
 
-		if(launchpads.containsKey(e.getClickedBlock().getLocation())) {
-			Rocket rocket = launchpads.get(e.getClickedBlock().getLocation());
+        if(launchpads.containsKey(e.getClickedBlock().getLocation())) {
             Player player = e.getPlayer();
+
+            // Check the flag
+            if(useFlag != null) {
+                Flag flag = (Flag)useFlag;
+                Area area = System.getActive().getAreaAt(e.getClickedBlock().getLocation());
+
+                if(!player.hasPermission(flag.getBypassPermission()) && !area.hasTrust(flag, player)) {
+                    player.sendMessage(area.getMessage(flag, player.getName()));
+                    return;
+                }
+            }
+
+            e.setCancelled(false); // Undo anti-grief measures for rockets.
+			Rocket rocket = launchpads.get(e.getClickedBlock().getLocation());
 
 			if((int)player.getLocation().getY() < player.getWorld().getHighestBlockYAt(player.getLocation())) {
                 player.teleport(rocket.getDestination().getLocation());
