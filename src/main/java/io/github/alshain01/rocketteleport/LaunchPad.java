@@ -5,6 +5,8 @@ import java.util.*;
 import io.github.alshain01.flags.*;
 import io.github.alshain01.flags.System;
 import io.github.alshain01.flags.area.Area;
+import io.github.alshain01.rocketteleport.Rocket.RocketLocation;
+
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -184,19 +186,23 @@ class LaunchPad implements Listener {
 
             e.setCancelled(false); // Undo anti-grief measures for rockets.
 			Rocket rocket = launchpads.get(e.getClickedBlock().getLocation());
+            List<RocketLocation> possibleDestinations = rocket.getDestination();
 
-			if((int)player.getLocation().getY() < player.getWorld().getHighestBlockYAt(player.getLocation())) {
-                player.teleport(rocket.getDestination().getLocation());
-				return;
-			}
+            // Get a random location from the list of possible locations
+            Location destination = possibleDestinations.get((int)(Math.random()*(possibleDestinations.size() - 1))).getLocation();
 
-            Location destination = rocket.getDestination().getLocation();
             if(rocket.getType().equals(RocketType.RANDOM)) {
+                // Get a random radius around the location
                 destination = getRandomLocation(destination, rocket.getRadius());
                 if(destination == null) {
                     player.sendMessage(ChatColor.RED + "Failed to locate suitable destination after " + retries +" attempts.");
                     return;
                 }
+            }
+
+            if((int)player.getLocation().getY() < player.getWorld().getHighestBlockYAt(player.getLocation())) {
+                player.teleport(destination);
+                return;
             }
 
             if(rocket.getType().equals(RocketType.HARD)) {
@@ -281,7 +287,7 @@ class LaunchPad implements Listener {
 		Rocket rocket = partialLP.get(player.getUniqueId());
 		partialLP.remove(player.getUniqueId());
 		destinationMode.remove(player.getUniqueId());
-        rocket.setDestination(e.getClickedBlock().getLocation());
+        rocket.addDestination(e.getClickedBlock().getLocation());
         launchpads.put(rocket.getTrigger().getLocation(), rocket);
         player.sendMessage(ChatColor.GREEN + "New rocket created.");
 	}

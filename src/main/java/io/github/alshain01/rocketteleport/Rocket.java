@@ -4,13 +4,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 class Rocket implements ConfigurationSerializable {
 	private final RocketType type;
 	private RocketLocation trigger = null;
-	private RocketLocation destination = null;
+	private List<RocketLocation> destination = new ArrayList<RocketLocation>();
 	private double radius = 0;
 
     protected class RocketLocation {
@@ -64,11 +66,18 @@ class Rocket implements ConfigurationSerializable {
     Rocket(Map<String, Object> rocket) {
         type = RocketType.valueOf((String)rocket.get("Type"));
         trigger = new RocketLocation((String)rocket.get("Trigger"));
-        if(((String)rocket.get("Destination")).equals("null")) {
-            // Upgrade from v1.1.0 and earlier where Random did not have a destination
-            destination = new RocketLocation((String)rocket.get("Trigger"));
+
+
+        if(rocket.get("Destination") instanceof List) {
+            destination.addAll((ArrayList<RocketLocation>)rocket.get("Destination"));
         } else {
-            destination = new RocketLocation((String)rocket.get("Destination"));
+            if(((String)rocket.get("Destination")).equals("null")) {
+                // Upgrade from v1.1.0 and earlier where Random did not have a destination
+                destination.add(new RocketLocation((String)rocket.get("Trigger")));
+            } else {
+                // Upgrade from v1.2.0 and earlier where rockets supported only one destination
+                destination.add(new RocketLocation((String)rocket.get("Destination")));
+            }
         }
         radius = (Double)rocket.get("Radius");
     }
@@ -88,7 +97,7 @@ class Rocket implements ConfigurationSerializable {
 	
 	RocketLocation getTrigger() { return trigger; }
 
-	RocketLocation getDestination() {	return destination; }
+	List<RocketLocation> getDestination() {	return destination; }
 
 	double getRadius() {
 		return radius;
@@ -96,7 +105,7 @@ class Rocket implements ConfigurationSerializable {
 	
 	void setTrigger(Location trigger) { this.trigger = new RocketLocation(trigger); }
 	
-	void setDestination(Location destination) {	this.destination = new RocketLocation(destination); }
+	void addDestination(Location destination) {	this.destination.add(new RocketLocation(destination)); }
 	
 	/*boolean setRadius(double radius) {
 		if(this.type == RocketType.RANDOM) {
