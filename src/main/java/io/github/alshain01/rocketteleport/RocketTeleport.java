@@ -48,12 +48,12 @@ public class RocketTeleport extends JavaPlugin {
             }
         }
 
-        // Register Non-Player Flags
+        // Register Player Flags
         if (getServer().getPluginManager().isPluginEnabled("Flags")) {
             getLogger().info("Enabling Flags Integration");
 
             // Connect to the data file and register the flags
-            Flags.getRegistrar().register(new ModuleYML(this, "flags.yml"), "RocketTeleport");
+            Flags.getRegistrar().register(new ModuleYML(this, "flags.yml"), this.getName());
         }
 
         new ServerEnabledTasks().run();

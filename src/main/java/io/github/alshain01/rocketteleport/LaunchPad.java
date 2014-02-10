@@ -72,9 +72,9 @@ class LaunchPad implements Listener {
     }
 
     void initFlags() {
-        landFlag = Flags.getRegistrar().getFlag("RTSetLanding");
-        createFlag = Flags.getRegistrar().getFlag("RTCreateRocket");
-        useFlag = Flags.getRegistrar().getFlag("RTUseRocket");
+        landFlag = Flags.getRegistrar().getFlag("SetRocketLanding");
+        createFlag = Flags.getRegistrar().getFlag("CreateRocket");
+        useFlag = Flags.getRegistrar().getFlag("UseRocket");
     }
 
     boolean hasPartialRocket(UUID player) {
