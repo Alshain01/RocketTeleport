@@ -1,0 +1,20 @@
+Message:
+  #
+  # Errors
+  #
+  COMMAND_ERROR: '&cYou do not have permission to use that command.'
+  CANCEL_ERROR: '&cThere is no pending LaunchPad creation.'
+  RADIUS_ERROR: '&cThe entered radius is invalid.'
+  ROCKET_ERROR: '&cYou do not have a rocket creation pending.'
+  CREATION_ERROR: '&cYou already have a launch pad pending, use &6/rt land &cto complete it.
+  #
+  # Notifications
+  #
+  INSTRUCTION: '&bRight click the button or plate to use as a {Type} rocket trigger.'
+  LAND_INSTRUCTION: '&bLeft click the landing zone to set.'
+  CANCEL_ROCKET: '&4Rocket LaunchPad creation canceled.'
+  #
+  # Updater
+  #
+  UPDATE_AVAILABLE: '&4The version of RocketTeleport that this server is running is out of date.  Please consider updating to the latest version at dev.bukkit.org/bukkit-plugins/rocketteleport/.'
+  UPDATE_DOWNLOADED: '&4An update to RocketTeleport has been downloaded and will be installed when the server is reloaded.'

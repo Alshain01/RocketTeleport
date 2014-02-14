@@ -35,55 +35,64 @@ import java.util.logging.Level;
 
 /**
  * Modified YAML manager from http://wiki.bukkit.org/Configuration_API_Reference
- * 
- * @author bukkit.org
  */
 final class CustomYML {
-	private static JavaPlugin plugin;
-	private final String dataFile;
-	private FileConfiguration customConfig = null;
-	private File customConfigFile = null;
+    private final JavaPlugin plugin;
+    private final String dataFile;
+    private FileConfiguration customConfig = null;
+    private File customConfigFile = null;
 
-	// Construct a new CustomYML file
-	public CustomYML(JavaPlugin plugin) {
-		CustomYML.plugin = plugin;
-		this.dataFile = "data.yml";
-	}
+    // Construct a new CustomYML file
+    CustomYML(JavaPlugin plugin, String dataFile) {
+        this.plugin = plugin;
+        this.dataFile = dataFile;
+    }
 
-	// Gets the custom config file.
-	public FileConfiguration getConfig() {
-		if (customConfig == null) {
-			reload();
-		}
-		return customConfig;
-	}
+    // Gets the custom config file.
+    public FileConfiguration getConfig() {
+        if (customConfig == null) {
+            reload();
+        }
+        return customConfig;
+    }
 
-	// Reloads the file to the MemorySection
-	void reload() {
-		if (customConfigFile == null) {
-			customConfigFile = new File(plugin.getDataFolder(), dataFile);
-		}
-		customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
+    // Reloads the file to the MemorySection
+    public void reload() {
+        if (customConfigFile == null) {
+            customConfigFile = new File(plugin.getDataFolder(), dataFile);
+        }
+        customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
 
-		// Look for defaults in the jar
-		final InputStream defConfigStream = plugin.getResource(dataFile);
-		if (defConfigStream != null) {
-			final YamlConfiguration defConfig = YamlConfiguration
-					.loadConfiguration(defConfigStream);
-			customConfig.setDefaults(defConfig);
-		}
-	}
+        // Look for defaults in the jar
+        final InputStream defConfigStream = plugin.getResource(dataFile);
+        if (defConfigStream != null) {
+            final YamlConfiguration defConfig = YamlConfiguration
+                    .loadConfiguration(defConfigStream);
+            customConfig.setDefaults(defConfig);
+        }
+    }
 
-	// Saves all changes
-	public void saveConfig() {
-		if (customConfig == null || customConfigFile == null) {
-			return;
-		}
-		try {
-			getConfig().save(customConfigFile);
-		} catch (final IOException ex) {
-			plugin.getLogger().log(Level.SEVERE,
-					"Could not save config to " + customConfigFile, ex);
-		}
-	}
+    // Saves all changes
+    public void saveConfig() {
+        if (customConfig == null || customConfigFile == null) {
+            return;
+        }
+        try {
+            getConfig().save(customConfigFile);
+        } catch (final IOException ex) {
+            plugin.getLogger().log(Level.SEVERE,
+                    "Could not save config to " + customConfigFile, ex);
+        }
+    }
+
+    // Save a default config file to the data folder.
+    public void saveDefaultConfig() {
+        if (customConfigFile == null) {
+            customConfigFile = new File(plugin.getDataFolder(), dataFile);
+        }
+
+        if (!customConfigFile.exists()) {
+            plugin.saveResource(dataFile, false);
+        }
+    }
 }

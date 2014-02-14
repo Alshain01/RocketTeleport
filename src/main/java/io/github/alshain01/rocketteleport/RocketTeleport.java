@@ -1,51 +1,44 @@
 package io.github.alshain01.rocketteleport;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import io.github.alshain01.flags.*;
-import io.github.alshain01.flags.System;
-import io.github.alshain01.rocketteleport.Updater.UpdateResult;
+import io.github.alshain01.flags.Flags;
+import io.github.alshain01.flags.ModuleYML;
+
+import io.github.alshain01.rocketteleport.metrics.MetricsManager;
+import io.github.alshain01.rocketteleport.update.UpdateScheduler;
+import io.github.alshain01.rocketteleport.update.UpdateListener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class RocketTeleport extends JavaPlugin {
-	private LaunchPad launchPad;
-    private CustomYML data;
-    private Updater updater = null;
+    static CustomYML message;  // Static for enumeration access
+	LaunchPad launchPad;
 
     @Override
 	public void onEnable() {
         this.saveDefaultConfig();
-        data = new CustomYML(this);
+        message = new CustomYML(this, "message.yml");
+        message.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Rocket.class);
 
-        if (getConfig().getBoolean("Update.Check")) {
-            new UpdateScheduler().runTaskTimer(this, 0, 1728000);
-            getServer().getPluginManager().registerEvents(new UpdateListener(), this);
+        PluginManager pm = Bukkit.getPluginManager();
+        ConfigurationSection updateConfig = getConfig().getConfigurationSection("Update");
+        if (updateConfig.getBoolean("Check")) {
+            UpdateScheduler updater = new UpdateScheduler(getFile(), updateConfig);
+            updater.run();
+            updater.runTaskTimer(this, 0, 1728000);
+            pm.registerEvents(new UpdateListener(updater), this);
         }
 
         if(this.getConfig().getBoolean("Metrics.Enabled")) {
-            try {
-                new MetricsLite(this).start();
-            } catch (IOException ex) {
-                this.getLogger().warning("Metrics failed to start.");
-            }
+            MetricsManager.StartMetrics(this);
         }
 
         // Register Player Flags
@@ -56,13 +49,28 @@ public class RocketTeleport extends JavaPlugin {
             Flags.getRegistrar().register(new ModuleYML(this, "flags.yml"), this.getName());
         }
 
+        getCommand("rocketteleport").setExecutor(new PluginCommand(this));
         new ServerEnabledTasks().run();
 	}
+
+    public void writeData() {
+        CustomYML data = new CustomYML(this, "data.yml");
+        data.getConfig().createSection("LaunchPads"); //Overwrite every time
+        launchPad.write(data.getConfig().getConfigurationSection("LaunchPads"));
+        data.saveConfig();
+    }
+
+    public void reload() {
+        writeData();
+        this.reloadConfig();
+        message.reload();
+        loadData();
+    }
 
     /*
      * Initialize the launch pads after the worlds have loaded
      */
-    protected void initialize() {
+    private void loadData() {
         // Grab the list of materials to not teleport players to
         List<?> list = this.getConfig().getList("Exclusions");
         Set<Material> exclusions = new HashSet<Material>();
@@ -72,7 +80,7 @@ public class RocketTeleport extends JavaPlugin {
 
         // Get the number of times to attempt to find a valid block.
         int retries = this.getConfig().getInt("Retries");
-
+        CustomYML data = new CustomYML(this, "data.yml");
         if(data.getConfig().isConfigurationSection("LaunchPads")) {
             launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions, retries);
         } else {
@@ -83,137 +91,22 @@ public class RocketTeleport extends JavaPlugin {
 
     @Override
 	public void onDisable() {
-        data.getConfig().createSection("LaunchPads"); //Overwrite every time
-        launchPad.write(data.getConfig().getConfigurationSection("LaunchPads"));
-        data.saveConfig();
+        writeData();
         ConfigurationSerialization.unregisterClass(Rocket.class);
     }
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if(!cmd.getName().equalsIgnoreCase("RocketTeleport") || args.length < 1) {
-			return false;
-		}
-
-		if(!(sender instanceof Player)) {
-			sender.sendMessage("RocketTeleport commands may not be used by the console.");
-			return true;
-		}
-		UUID player = ((Player)sender).getUniqueId(); 
-		
-		// Is the player setting a landing zone?
-		if (args[0].equalsIgnoreCase("land") && launchPad.hasPartialRocket(player)) {
-			if(args.length > 1) {
-				return false;
-			}
-			launchPad.setLandMode(player);
-			sender.sendMessage(ChatColor.AQUA + "Left click the landing zone.");
-			return true;
-		}
-
-		// Is the player attempting to create a cannon while one is already in the queue?
-		if(!args[0].equalsIgnoreCase("cancel") && launchPad.hasPartialRocket(player)) {
-			sender.sendMessage(ChatColor.RED + "You already have a launch pad pending, use /rt land to complete it.");
-            return true;
-		}
-		
-		// Is the player creating a random cannon?
-		if(args[0].equalsIgnoreCase("random") && args.length < 2) {
-			sender.sendMessage("/RocketTeleport random <Radius>");
-			return true;
-		}
-		
-		if(args[0].equalsIgnoreCase("random")) {
-			double radius;
-			try {
-				radius = Double.valueOf(args[1]);
-			} catch(NumberFormatException ex) {
-				sender.sendMessage(ChatColor.RED + "The radius is invalid.");
-				return true;
-			}
-			
-			launchPad.addPartialRocket(player, new Rocket(radius));
-			sender.sendMessage(ChatColor.AQUA + "Right click the button or plate you wish to use as a rocket trigger." );
-			return true;
-		}
-		
-		if(args.length > 1) {
-			return false;
-		}
-	
-		if(args[0].equalsIgnoreCase("soft")) {
-			launchPad.addPartialRocket(player, new Rocket(RocketType.SOFT));
-			sender.sendMessage(ChatColor.AQUA + "Right click the button or plate you wish to use as a rocket trigger.");
-			return true;
-		} else if (args[0].equalsIgnoreCase("hard")) {
-			launchPad.addPartialRocket(player, new Rocket(RocketType.HARD));
-			sender.sendMessage(ChatColor.AQUA + "Right click the button or plate you wish to use as a rocket trigger.");
-			return true;
-		} else if (args[0].equalsIgnoreCase("cancel")) {
-            if(launchPad.cancelCreation(player)) {
-                sender.sendMessage(ChatColor.DARK_RED + "Rocket LaunchPad creation canceled.");
-                return true;
-            }
-            sender.sendMessage(ChatColor.RED + "There is no pending LaunchPad creation.");
-            return true;
-        }
-		return false;
-	}
+    // Public pass-through
+    public Map<RocketType, Integer> getRocketCount() {
+        return launchPad.getRocketCount();
+    }
 
     /*
- * Tasks that must be run only after the entire sever has loaded. Runs on
- * first server tick.
- */
+     * Tasks that must be run only after the entire sever has loaded. Runs on
+     * first server tick.
+     */
     private class ServerEnabledTasks extends BukkitRunnable {
         public void run() {
-            ((RocketTeleport)Bukkit.getPluginManager().getPlugin("RocketTeleport")).initialize();
-        }
-    }
-
-    /*
-     * Contains event listeners required for plugin maintenance.
-     */
-    private class UpdateListener implements Listener {
-        // Update listener
-        @EventHandler(ignoreCancelled = true)
-        private void onPlayerJoin(PlayerJoinEvent e) {
-            if(updater == null) { return; }
-            if (e.getPlayer().hasPermission("rocketteleport.admin.notifyupdate")) {
-                if(updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
-                    e.getPlayer().sendMessage(ChatColor.DARK_PURPLE
-                            + "The version of RocketTeleport that this server is running is out of date. "
-                            + "Please consider updating to the latest version at dev.bukkit.org/bukkit-plugins/rocketteleport/.");
-                } else if(updater.getResult() == UpdateResult.SUCCESS) {
-                    e.getPlayer().sendMessage("[RocketTeleport] " + ChatColor.DARK_PURPLE
-                            + "An update to RocketTeleport has been downloaded and will be installed when the server is reloaded.");
-                }
-            }
-        }
-    }
-
-    /*
-     * Handles update checking and downloading
-     */
-    private class UpdateScheduler extends BukkitRunnable {
-        @Override
-        public void run() {
-            // Update script
-            final String key = getConfig().getString("Update.ServerModsAPIKey");
-            final Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport");
-            updater = (getConfig().getBoolean("Update.Download"))
-                    ? new Updater(plugin, 70281, getFile(), Updater.UpdateType.DEFAULT, key, true)
-                    : new Updater(plugin, 70281, getFile(), Updater.UpdateType.NO_DOWNLOAD, key, false);
-
-            if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
-                Bukkit.getServer().getConsoleSender()
-                        .sendMessage("[RocketTeleport] "	+ ChatColor.DARK_PURPLE
-                                + "The version of RocketTeleport that this server is running is out of date. "
-                                + "Please consider updating to the latest version at dev.bukkit.org/bukkit-plugins/rocketteleport/.");
-            } else if (updater.getResult() == UpdateResult.SUCCESS) {
-                Bukkit.getServer().getConsoleSender()
-                        .sendMessage("[RocketTeleport] "	+ ChatColor.DARK_PURPLE
-                                + "An update to RocketTeleport has been downloaded and will be installed when the server is reloaded.");
-            }
+            ((RocketTeleport)Bukkit.getPluginManager().getPlugin("RocketTeleport")).loadData();
         }
     }
 }

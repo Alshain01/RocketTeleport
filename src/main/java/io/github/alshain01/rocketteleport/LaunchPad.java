@@ -302,4 +302,18 @@ class LaunchPad implements Listener {
             e.getPlayer().sendMessage(ChatColor.DARK_RED + "RocketTeleport Launchpad Destroyed.");
         }
     }
+
+    Map<RocketType, Integer> getRocketCount() {
+        Map<RocketType, Integer> counts = new HashMap<RocketType, Integer>();
+        for(RocketType r : RocketType.values()) {
+            counts.put(r, 0);
+        }
+
+        for(Rocket r : launchpads.values()) {
+            int count = counts.get(r.getType());
+            count++;
+            counts.put(r.getType(), count);
+        }
+        return counts;
+    }
 }
