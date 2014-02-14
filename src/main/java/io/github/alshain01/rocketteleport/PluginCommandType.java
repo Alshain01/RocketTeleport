@@ -4,7 +4,7 @@ import org.bukkit.permissions.Permissible;
 
 enum PluginCommandType {
     SOFT(1, "soft"), HARD(1, "hard"), RANDOM(2, "random <radius>"),
-    LAND(1, "land"), CANCEL(1, "cancel"), JASON(1, "jason"),
+    LAND(1, "land"), CANCEL(1, "cancel"), VILLAGER14(1, "villager14"),
     RELOAD(1, "reload"), SAVE(1, "save");
 
 
