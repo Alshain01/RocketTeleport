@@ -15,7 +15,7 @@ class Rocket implements ConfigurationSerializable {
 	private List<RocketLocation> destination = new ArrayList<RocketLocation>();
 	private double radius = 0;
 
-    protected class RocketLocation {
+    class RocketLocation {
         final String world;
         final double coords[] = new double[3];
 
@@ -68,10 +68,15 @@ class Rocket implements ConfigurationSerializable {
         trigger = new RocketLocation((String)rocket.get("Trigger"));
 
 
-        if(rocket.get("Destination") instanceof List) {
-            destination.addAll((ArrayList<RocketLocation>)rocket.get("Destination"));
+        if(rocket.get("Destination") instanceof ArrayList<?>) {
+            List<?> list = (ArrayList<?>)rocket.get("Destination");
+            List<RocketLocation> locations = new ArrayList<RocketLocation>();
+            for(Object o : list) {
+                locations.add((RocketLocation)o);
+            }
+            destination.addAll(locations);
         } else {
-            if(((String)rocket.get("Destination")).equals("null")) {
+            if(rocket.get("Destination").equals("null")) {
                 // Upgrade from v1.1.0 and earlier where Random did not have a destination
                 destination.add(new RocketLocation((String)rocket.get("Trigger")));
             } else {

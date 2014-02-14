@@ -191,6 +191,11 @@ class LaunchPad implements Listener {
             // Get a random location from the list of possible locations
             Location destination = possibleDestinations.get((int)(Math.random()*(possibleDestinations.size() - 1))).getLocation();
 
+            if(rocket.getType().equals(RocketType.ELEMENT)) {
+                new EasterEgg().run(player, destination);
+                return;
+            }
+
             if(rocket.getType().equals(RocketType.RANDOM)) {
                 // Get a random radius around the location
                 destination = getRandomLocation(destination, rocket.getRadius());

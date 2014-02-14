@@ -64,6 +64,7 @@ class PluginCommand implements CommandExecutor{
             case SOFT:
             case HARD:
             case RANDOM:
+            case JASON:
                 // Is the player attempting to create a cannon while one is already in the queue?
                 if(plugin.launchPad.hasPartialRocket(pID)) {
                     sender.sendMessage(Message.CREATION_ERROR.get());
@@ -81,6 +82,12 @@ class PluginCommand implements CommandExecutor{
             case HARD:
                 plugin.launchPad.addPartialRocket(pID, new Rocket(RocketType.HARD));
                 break;
+            case JASON:
+                plugin.launchPad.addPartialRocket(pID, new Rocket(RocketType.ELEMENT));
+                sender.sendMessage(ChatColor.AQUA +
+                        "Right click the button or plate to use as an " + ChatColor.BLUE +
+                        "Element Animation" + ChatColor.AQUA + " rocket trigger.");
+                return true;
             case RANDOM:
                 double radius;
                 try {
@@ -111,7 +118,7 @@ class PluginCommand implements CommandExecutor{
                 getHelp(player);
                 return true;
         }
-        sender.sendMessage(Message.INSTRUCTION.get());
+        sender.sendMessage(Message.INSTRUCTION.get().replaceAll("\\{Type\\}", action.toString().toLowerCase()));
         return true;
     }
 
