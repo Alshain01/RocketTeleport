@@ -84,9 +84,9 @@ class PluginCommand implements CommandExecutor{
                 break;
             case JASON:
                 plugin.launchPad.addPartialRocket(pID, new Rocket(RocketType.ELEMENT));
-                sender.sendMessage(ChatColor.AQUA +
+                sender.sendMessage(ChatColor.GOLD +
                         "Right click the button or plate to use as an " + ChatColor.BLUE +
-                        "Element Animation" + ChatColor.AQUA + " rocket trigger.");
+                        "Element Animation" + ChatColor.GOLD + " rocket trigger.");
                 return true;
             case RANDOM:
                 double radius;
