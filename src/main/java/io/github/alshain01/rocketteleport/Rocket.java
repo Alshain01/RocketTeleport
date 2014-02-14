@@ -12,7 +12,7 @@ import java.util.Map;
 class Rocket implements ConfigurationSerializable {
 	private final RocketType type;
 	private RocketLocation trigger = null;
-	private List<RocketLocation> destination = new ArrayList<RocketLocation>();
+	private final List<RocketLocation> destination = new ArrayList<RocketLocation>();
 	private double radius = 0;
 
     class RocketLocation {

@@ -8,9 +8,9 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-public class EasterEgg {
-    final Plugin plugin = Bukkit.getPluginManager().getPlugin("RocketTeleport");
-    final int TIME = 40;
+class EasterEgg {
+    private final Plugin plugin = Bukkit.getPluginManager().getPlugin("RocketTeleport");
+    private final int TIME = 40;
 
     void run(Player player, Location location) {
 
@@ -29,9 +29,10 @@ public class EasterEgg {
         new MessageTask(player, "<&3Villager #9&f> ...and that was the last we saw'r of those villagers.").runTaskLater(plugin, TIME * 10);
     }
 
-    private Location getDropLocation(Location landingArea, double radius) {
-        double x = (landingArea.getX() - radius) + Math.random() * (radius*2);
-        double z = (landingArea.getZ() - radius) + Math.random() * (radius*2);
+    private Location getDropLocation(Location landingArea) {
+        final int RADIUS = 15;
+        double x = (landingArea.getX() - RADIUS) + Math.random() * (RADIUS*2);
+        double z = (landingArea.getZ() - RADIUS) + Math.random() * (RADIUS*2);
         Location loc = new Location(landingArea.getWorld(), x, 0D, z);
         Block landing = loc.getWorld().getHighestBlockAt(loc);
         return landing.getLocation().add(0, 25, 0);
@@ -53,7 +54,7 @@ public class EasterEgg {
     }
 
     private class RocketVillagerTask extends BukkitRunnable {
-        Location location;
+        final Location location;
 
         RocketVillagerTask(Location location) {
             this.location = location;
@@ -68,21 +69,21 @@ public class EasterEgg {
     }
 
     private class RainVillagersTask extends BukkitRunnable {
-        Location location;
+        final Location location;
         RainVillagersTask(Location location) {
             this.location = location;
         }
 
         public void run() {
             for(int x = 0; x < 15; x++) {
-                Entity entity = location.getWorld().spawnEntity(getDropLocation(location, 15), EntityType.VILLAGER);
+                Entity entity = location.getWorld().spawnEntity(getDropLocation(location), EntityType.VILLAGER);
                 new DespawnTask(entity).runTaskLater(plugin, TIME * 3);
             }
         }
     }
 
     private class DespawnTask extends BukkitRunnable {
-        Entity entity;
+        final Entity entity;
 
         DespawnTask(Entity entity) {
             this.entity = entity;
