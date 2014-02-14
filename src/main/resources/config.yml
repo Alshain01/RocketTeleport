@@ -11,6 +11,11 @@ Exclusions:
   - WATER
   - STATIONARY_WATER
 #
+# He's running.  He's running. Are they gonna catch him? We don't know.
+# 20 = ~1 second
+#
+EasterEggTimeout: 36000
+#
 # Enable or Disable MCStats metrics logging
 #
 Metrics:

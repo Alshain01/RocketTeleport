@@ -49,7 +49,7 @@ class EasterEgg {
 
         @Override
         public void run() {
-            player.sendMessage(message);
+            Bukkit.getServer().broadcastMessage(message);
         }
     }
 

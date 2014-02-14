@@ -19,6 +19,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -46,6 +47,7 @@ class LaunchPad implements Listener {
             Material.STONE_PLATE));
 
     private final int retries;
+    private boolean easterEggTimeout = true;
 
     LaunchPad(ConfigurationSection config, Set<Material> exclusions, int retries) {
         Set<String> k = config.getKeys(false);
@@ -192,7 +194,19 @@ class LaunchPad implements Listener {
             Location destination = possibleDestinations.get((int)(Math.random()*(possibleDestinations.size() - 1))).getLocation();
 
             if(rocket.getType().equals(RocketType.ELEMENT)) {
-                new EasterEgg().run(player, destination);
+                Plugin plugin = Bukkit.getPluginManager().getPlugin("RocketTeleport");
+                if(easterEggTimeout) {
+                    new EasterEgg().run(player, destination);
+                    easterEggTimeout = false;
+                    new BukkitRunnable() {
+                        public void run() {
+                            easterEggTimeout = true;
+                        }
+                    }.runTaskLater(plugin, plugin.getConfig().getInt("EasterEggTimeout"));
+                } else {
+                    double timeout = plugin.getConfig().getInt("EasterEggTimeout") / 60 / 20;
+                    player.sendMessage(ChatColor.RED + "This can only be used once every " + timeout + " minutes server wide.");
+                }
                 return;
             }
 
