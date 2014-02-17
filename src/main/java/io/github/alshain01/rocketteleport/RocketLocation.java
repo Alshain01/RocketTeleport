@@ -33,9 +33,9 @@ class RocketLocation {
     private final double coords[] = new double[3];
 
     RocketLocation(Location location) {
-        coords[0] = location.getX();
-        coords[1] = location.getY();
-        coords[2] = location.getZ();
+        coords[0] = getMidpoint(location.getX()) ;
+        coords[1] = Math.ceil(location.getY());
+        coords[2] = getMidpoint(location.getZ());
         world = location.getWorld().getName();
     }
 
@@ -59,5 +59,15 @@ class RocketLocation {
 
     public Location getLocation() {
         return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2]);
+    }
+
+    private double getMidpoint(double value) {
+        if (value < 0) {
+            value = Math.ceil(value);
+            return value - 0.5;
+        } else {
+            value = Math.floor(value);
+            return value + 0.5;
+        }
     }
 }

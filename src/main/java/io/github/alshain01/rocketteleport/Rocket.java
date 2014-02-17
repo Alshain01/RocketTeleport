@@ -43,11 +43,6 @@ class Rocket implements ConfigurationSerializable {
 		this.type = type;
 	}
 	
-	/*Rocket(RocketType type, Location destination) {
-		this.type = type;
-		this.destination = destination;
-	}*/
-	
 	Rocket(double radius) {
 		this.type = RocketType.RANDOM;
 		this.radius = radius;
@@ -58,11 +53,11 @@ class Rocket implements ConfigurationSerializable {
         trigger = new RocketLocation((String)rocket.get("Trigger"));
 
 
-        if(rocket.get("Destination") instanceof ArrayList<?>) {
+        if(rocket.get("Destination") instanceof List<?>) {
             List<?> list = (ArrayList<?>)rocket.get("Destination");
             List<RocketLocation> locations = new ArrayList<RocketLocation>();
             for(Object o : list) {
-                locations.add((RocketLocation)o);
+                locations.add(new RocketLocation((String)o));
             }
             destination.addAll(locations);
         } else {
@@ -81,8 +76,13 @@ class Rocket implements ConfigurationSerializable {
         Map<String, Object> rocket = new HashMap<String, Object>();
         rocket.put("Type", type.toString());
         rocket.put("Trigger", trigger.toString());
-        rocket.put("Destination",  destination.toString());
         rocket.put("Radius", radius);
+
+        List destinations = new ArrayList<String>();
+        for(RocketLocation l : destination) {
+            destinations.add(l.toString());
+        }
+        rocket.put("Destination",  destinations);
         return rocket;
     }
 

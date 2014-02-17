@@ -155,7 +155,7 @@ class PluginCommand implements CommandExecutor{
         StringBuilder helpText = new StringBuilder("/rocketteleport <");
         boolean first = true;
         for(PluginCommandType a : PluginCommandType.values()) {
-            if(a.equals(PluginCommandType.SAVE) || a.equals(PluginCommandType.RELOAD)) { continue; } // Don't show in game
+            if(a.isHidden()) { continue; }
             if(a.hasPermission(sender)) {
                 if(!first) { helpText.append(" | "); }
                 helpText.append(a.toString().toLowerCase());

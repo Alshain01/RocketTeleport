@@ -28,17 +28,22 @@ package io.github.alshain01.rocketteleport;
 import org.bukkit.permissions.Permissible;
 
 enum PluginCommandType {
-    SOFT(1, "soft"), HARD(1, "hard"), RANDOM(2, "random <radius>"),
-    LAND(1, "land"), CANCEL(1, "cancel"), VILLAGER14(1, "villager14"),
-    RELOAD(1, "reload"), SAVE(1, "save");
-
+    SOFT(1, "soft", false), HARD(1, "hard", false), RANDOM(2, "random <radius>", false),
+    LAND(1, "land", false), CANCEL(1, "cancel", false), VILLAGER14(1, "villager14", true),
+    RELOAD(1, "reload", true), SAVE(1, "save", true);
 
     private final int totalArgs;
     private final String help;
+    private final boolean hidden;
 
-    PluginCommandType(int minArgs, String help) {
+    PluginCommandType(int minArgs, String help, boolean hidden) {
+        this.hidden = hidden;
         totalArgs = minArgs;
         this.help = help;
+    }
+
+    public boolean isHidden() {
+        return hidden;
     }
 
     /*public String getMessage() {
