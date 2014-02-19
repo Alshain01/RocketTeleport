@@ -47,7 +47,7 @@ class PluginCommand implements CommandExecutor{
             return true;
         }
 
-        final PluginCommandType action = getAction(args[0], sender);
+        final PluginCommandType action = getAction(args[0].toUpperCase(), sender);
         if(action == null) { return true; }
 
         // Check that there are enough arguments
@@ -91,7 +91,7 @@ class PluginCommand implements CommandExecutor{
             case RANDOM:
             case VILLAGER14:
                 // Is the player attempting to create a cannon while one is already in the queue?
-                if(plugin.launchPad.hasPartialRocket(pID)) {
+                if(plugin.rocketQueue.containsKey(pID)) {
                     sender.sendMessage(Message.CREATION_ERROR.get());
                     return true;
                 }
@@ -101,18 +101,35 @@ class PluginCommand implements CommandExecutor{
 
         // Perform the command
         switch (action) {
-            case SOFT:
-                plugin.launchPad.addPartialRocket(pID, new Rocket(RocketType.SOFT));
-                break;
-            case HARD:
-                plugin.launchPad.addPartialRocket(pID, new Rocket(RocketType.HARD));
-                break;
+            case CANCEL:
+                if(plugin.rocketQueue.containsKey(pID)) {
+                    plugin.commandQueue.remove(pID);
+                    plugin.rocketQueue.remove(pID);
+                    sender.sendMessage(Message.CANCEL_ROCKET.get());
+                    return true;
+                }
+                sender.sendMessage(Message.CANCEL_ERROR.get());
+                return true;
+            case LAND:
+                if (!plugin.rocketQueue.containsKey(pID)) {
+                    sender.sendMessage(Message.ROCKET_ERROR.get());
+                    return true;
+                }
+
+                plugin.commandQueue.put(pID, action);
+                sender.sendMessage(Message.LAND_INSTRUCTION.get());
+                return true;
             case VILLAGER14:
-                plugin.launchPad.addPartialRocket(pID, new Rocket(RocketType.ELEMENT));
+                plugin.commandQueue.put(pID, action);
+                plugin.rocketQueue.put(pID, new Rocket(RocketType.ELEMENT));
                 sender.sendMessage(ChatColor.GOLD +
                         "Right click the button or plate to use as an " + ChatColor.BLUE +
                         "Element Animation" + ChatColor.GOLD + " rocket trigger.");
                 return true;
+            case SOFT:
+            case HARD:
+                plugin.rocketQueue.put(pID, new Rocket(RocketType.valueOf(action.toString())));
+                break;
             case RANDOM:
                 double radius;
                 try {
@@ -122,27 +139,14 @@ class PluginCommand implements CommandExecutor{
                     return true;
                 }
 
-                plugin.launchPad.addPartialRocket(pID, new Rocket(radius));
+                plugin.rocketQueue.put(pID, new Rocket(radius));
                 break;
-            case LAND:
-                if (!plugin.launchPad.hasPartialRocket(pID)) {
-                    sender.sendMessage(Message.ROCKET_ERROR.get());
-                }
-
-                plugin.launchPad.setLandMode(pID);
-                sender.sendMessage(Message.LAND_INSTRUCTION.get());
-                return true;
-            case CANCEL:
-                if(plugin.launchPad.cancelCreation(pID)) {
-                    sender.sendMessage(Message.CANCEL_ROCKET.get());
-                    return true;
-                }
-                sender.sendMessage(Message.CANCEL_ERROR.get());
-                return true;
             default:
                 getHelp(player);
                 return true;
         }
+
+        plugin.commandQueue.put(pID, action);
         sender.sendMessage(Message.INSTRUCTION.get().replaceAll("\\{Type\\}", action.toString().toLowerCase()));
         return true;
     }

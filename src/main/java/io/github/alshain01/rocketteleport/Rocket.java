@@ -98,15 +98,13 @@ class Rocket implements ConfigurationSerializable {
 		return radius;
 	}
 	
-	void setTrigger(Location trigger) { this.trigger = new RocketLocation(trigger); }
+	Rocket setTrigger(Location trigger) {
+        this.trigger = new RocketLocation(trigger);
+        return this;
+    }
 	
-	void addDestination(Location destination) {	this.destination.add(new RocketLocation(destination)); }
-	
-	/*boolean setRadius(double radius) {
-		if(this.type == RocketType.RANDOM) {
-			this.radius = radius;
-			return true;
-		}
-		return false;
-	}*/
+	Rocket addDestination(Location destination) {
+        this.destination.add(new RocketLocation(destination));
+        return this;
+    }
 }

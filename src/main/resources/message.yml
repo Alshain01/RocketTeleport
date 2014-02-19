@@ -12,7 +12,9 @@ Message:
   #
   INSTRUCTION: '&bRight click the button or plate to use as a {Type} rocket trigger.'
   LAND_INSTRUCTION: '&bLeft click the landing zone to set.'
+  COMMAND_INSTRUCTION: '&bTrigger location set, use &6{Command} &bto create landing zone.');
   CANCEL_ROCKET: '&4Rocket LaunchPad creation canceled.'
+  ROCKET_CREATED '&aNew rocket created.'
   #
   # Updater
   #

@@ -27,15 +27,11 @@ package io.github.alshain01.rocketteleport;
 
 import java.util.*;
 
-import io.github.alshain01.flags.Flags;
-import io.github.alshain01.flags.ModuleYML;
-
 import io.github.alshain01.rocketteleport.metrics.MetricsManager;
 import io.github.alshain01.rocketteleport.update.UpdateScheduler;
 import io.github.alshain01.rocketteleport.update.UpdateListener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.PluginManager;
@@ -45,6 +41,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access
 	LaunchPad launchPad;
+    Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
+    Map<UUID, Rocket> rocketQueue = new HashMap<UUID, Rocket>();
 
     @Override
 	public void onEnable() {
@@ -66,26 +64,19 @@ public class RocketTeleport extends JavaPlugin {
             MetricsManager.StartMetrics(this);
         }
 
-        // Register Player Flags
-        if (getServer().getPluginManager().isPluginEnabled("Flags")) {
-            getLogger().info("Enabling Flags Integration");
-
-            // Connect to the data file and register the flags
-            Flags.getRegistrar().register(new ModuleYML(this, "flags.yml"), this.getName());
-        }
-
+        pm.registerEvents(new RocketListener(this), this);
         getCommand("rocketteleport").setExecutor(new PluginCommand(this));
         new ServerEnabledTasks().run();
 	}
 
-    public void writeData() {
+    void writeData() {
         CustomYML data = new CustomYML(this, "data.yml");
         data.getConfig().createSection("LaunchPads"); //Overwrite every time
         launchPad.write(data.getConfig().getConfigurationSection("LaunchPads"));
         data.saveConfig();
     }
 
-    public void reload() {
+    void reload() {
         writeData();
         this.reloadConfig();
         message.reload();
@@ -96,22 +87,13 @@ public class RocketTeleport extends JavaPlugin {
      * Initialize the launch pads after the worlds have loaded
      */
     private void loadData() {
-        // Grab the list of materials to not teleport players to
-        List<?> list = this.getConfig().getList("Exclusions");
-        Set<Material> exclusions = new HashSet<Material>();
-        for(Object o : list) {
-            exclusions.add(Material.valueOf((String)o));
-        }
-
         // Get the number of times to attempt to find a valid block.
-        int retries = this.getConfig().getInt("Retries");
         CustomYML data = new CustomYML(this, "data.yml");
         if(data.getConfig().isConfigurationSection("LaunchPads")) {
-            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"), exclusions, retries);
+            launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"));
         } else {
-            launchPad = new LaunchPad(exclusions, retries);
+            launchPad = new LaunchPad();
         }
-        this.getServer().getPluginManager().registerEvents(launchPad, this);
     }
 
     @Override
@@ -130,6 +112,7 @@ public class RocketTeleport extends JavaPlugin {
      * first server tick.
      */
     private class ServerEnabledTasks extends BukkitRunnable {
+        @Override
         public void run() {
             ((RocketTeleport)Bukkit.getPluginManager().getPlugin("RocketTeleport")).loadData();
         }
