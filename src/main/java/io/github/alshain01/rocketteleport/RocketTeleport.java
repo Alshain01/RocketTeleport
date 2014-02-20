@@ -54,9 +54,9 @@ public class RocketTeleport extends JavaPlugin {
         PluginManager pm = Bukkit.getPluginManager();
         ConfigurationSection updateConfig = getConfig().getConfigurationSection("Update");
         if (updateConfig.getBoolean("Check")) {
-            UpdateScheduler updater = new UpdateScheduler(getFile(), updateConfig);
-            updater.run();
-            updater.runTaskTimer(this, 0, 1728000);
+            UpdateScheduler updater = new UpdateScheduler(this, getFile(), updateConfig);
+            updater.runTaskAsynchronously(this);
+            updater.runTaskTimerAsynchronously(this, 3600, 1728000);
             pm.registerEvents(new UpdateListener(updater), this);
         }
 
