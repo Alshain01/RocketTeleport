@@ -55,8 +55,12 @@ public class RocketTeleport extends JavaPlugin {
         ConfigurationSection updateConfig = getConfig().getConfigurationSection("Update");
         if (updateConfig.getBoolean("Check")) {
             UpdateScheduler updater = new UpdateScheduler(this, getFile(), updateConfig);
-            updater.runTaskAsynchronously(this);
-            updater.runTaskTimerAsynchronously(this, 3600, 1728000);
+            Long timer = updateConfig.getLong("Interval");
+            if(timer < 1L) {
+                updater.runTaskAsynchronously(this);
+            } else {
+                updater.runTaskTimerAsynchronously(this, 0L, timer * 1200L);
+            }
             pm.registerEvents(new UpdateListener(updater), this);
         }
 
