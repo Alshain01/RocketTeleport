@@ -1,7 +1,7 @@
 package io.github.alshain01.rocketteleport.metrics;
 
 import io.github.alshain01.rocketteleport.RocketTeleport;
-import io.github.alshain01.rocketteleport.RocketType;
+import io.github.alshain01.rocketteleport.Rocket.RocketType;
 import io.github.alshain01.rocketteleport.metrics.Metrics.Graph;
 
 import java.io.IOException;

@@ -25,6 +25,7 @@
 
 package io.github.alshain01.rocketteleport;
 
+import io.github.alshain01.rocketteleport.Rocket.RocketType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,11 +36,44 @@ import org.bukkit.permissions.Permissible;
 import java.util.UUID;
 
 class PluginCommand implements CommandExecutor{
+    enum PluginCommandType {
+        SOFT(1, "soft", false), HARD(1, "hard", false), RANDOM(2, "random <radius>", false),
+        LAND(1, "land", false), CANCEL(1, "cancel", false), VILLAGER14(1, "villager14", true),
+        RELOAD(1, "reload", true), SAVE(1, "save", true);
+
+        private final int totalArgs;
+        private final String help;
+        private final boolean hidden;
+
+        PluginCommandType(int minArgs, String help, boolean hidden) {
+            this.hidden = hidden;
+            totalArgs = minArgs;
+            this.help = help;
+        }
+
+        public boolean isHidden() {
+            return hidden;
+        }
+
+        public String getHelp() {
+            return "/rocketteleport " + help;
+        }
+
+        public int getTotalArgs() {
+            return totalArgs;
+        }
+
+        public boolean hasPermission(Permissible sender) {
+            return sender.hasPermission("rocketteleport." + this.toString().toLowerCase());
+        }
+    }
+
     private final RocketTeleport plugin;
 
     PluginCommand(RocketTeleport plugin) {
         this.plugin = plugin;
     }
+
     @Override
     public boolean onCommand(final CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
         if (args.length < 1) {
@@ -85,12 +119,12 @@ class PluginCommand implements CommandExecutor{
             return true;
         }
 
+        // Is the player attempting to create a cannon while one is already in the queue?
         switch (action) {
             case SOFT:
             case HARD:
             case RANDOM:
             case VILLAGER14:
-                // Is the player attempting to create a cannon while one is already in the queue?
                 if(plugin.rocketQueue.containsKey(pID)) {
                     sender.sendMessage(Message.CREATION_ERROR.get());
                     return true;

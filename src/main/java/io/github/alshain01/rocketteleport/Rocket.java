@@ -25,6 +25,7 @@
 
 package io.github.alshain01.rocketteleport;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -33,7 +34,63 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Rocket implements ConfigurationSerializable {
+public class Rocket implements ConfigurationSerializable {
+    public enum RocketType {
+        RANDOM, SOFT, HARD, ELEMENT;
+
+        public String getName() {
+            // Make it look nice (Capital first, lower rest)
+            if(this == ELEMENT) {
+                return "Element Animation";
+            }
+            return this.toString().substring(0, 1).toUpperCase() + this.toString().substring(1).toLowerCase();
+        }
+    }
+
+    class RocketLocation {
+        private final String world;
+        private final double coords[] = new double[3];
+
+        RocketLocation(Location location) {
+            coords[0] = getMidpoint(location.getX()) ;
+            coords[1] = Math.ceil(location.getY());
+            coords[2] = getMidpoint(location.getZ());
+            world = location.getWorld().getName();
+        }
+
+        RocketLocation(String location) {
+            String[] arg = location.split(",");
+
+            world = arg[0];
+            for (int a = 0; a < 3; a++) {
+                coords[a] = Double.parseDouble(arg[a+1]);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return world + "," + coords[0] + "," + coords[1] + "," + coords[2];
+        }
+
+        public String toKey() {
+            return world + "," + (int)coords[0] + "," + (int)coords[1] + "," + (int)coords[2];
+        }
+
+        public Location getLocation() {
+            return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2]);
+        }
+
+        private double getMidpoint(double value) {
+            if (value < 0) {
+                value = Math.ceil(value);
+                return value - 0.5;
+            } else {
+                value = Math.floor(value);
+                return value + 0.5;
+            }
+        }
+    }
+
 	private final RocketType type;
 	private RocketLocation trigger = null;
 	private final List<RocketLocation> destination = new ArrayList<RocketLocation>();

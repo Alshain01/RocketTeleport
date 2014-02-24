@@ -27,6 +27,8 @@ package io.github.alshain01.rocketteleport;
 
 import java.util.*;
 
+import io.github.alshain01.rocketteleport.Rocket.RocketType;
+import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
 import io.github.alshain01.rocketteleport.metrics.MetricsManager;
 import io.github.alshain01.rocketteleport.update.UpdateScheduler;
 import io.github.alshain01.rocketteleport.update.UpdateListener;
