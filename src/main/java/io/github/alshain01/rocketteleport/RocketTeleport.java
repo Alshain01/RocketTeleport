@@ -64,13 +64,9 @@ public class RocketTeleport extends JavaPlugin {
             pm.registerEvents(new UpdateListener(updater), this);
         }
 
-        if(this.getConfig().getBoolean("Metrics.Enabled")) {
-            MetricsManager.StartMetrics(this);
-        }
-
         pm.registerEvents(new RocketListener(this), this);
         getCommand("rocketteleport").setExecutor(new PluginCommand(this));
-        new ServerEnabledTasks().run();
+        new ServerEnabledTasks(this).run();
 	}
 
     void writeData() {
@@ -116,9 +112,19 @@ public class RocketTeleport extends JavaPlugin {
      * first server tick.
      */
     private class ServerEnabledTasks extends BukkitRunnable {
+        RocketTeleport plugin;
+        ServerEnabledTasks(RocketTeleport plugin) {
+            this.plugin = plugin;
+        }
+
+
         @Override
         public void run() {
-            ((RocketTeleport)Bukkit.getPluginManager().getPlugin("RocketTeleport")).loadData();
+            plugin.loadData();
+
+            if(plugin.getConfig().getBoolean("Metrics.Enabled")) {
+                MetricsManager.StartMetrics(plugin);
+            }
         }
     }
 }

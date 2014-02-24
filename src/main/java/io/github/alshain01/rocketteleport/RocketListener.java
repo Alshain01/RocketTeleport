@@ -112,7 +112,7 @@ class RocketListener implements Listener {
         Flag f = (Flag)flag;
         Area area = System.getActive().getAreaAt(location);
 
-        if(!player.hasPermission(f.getBypassPermission()) && !area.hasTrust(f, player)) {
+        if(!area.getValue(f, false) && !player.hasPermission(f.getBypassPermission()) && !area.hasTrust(f, player)) {
             player.sendMessage(area.getMessage(f, player.getName()));
             return true;
         }

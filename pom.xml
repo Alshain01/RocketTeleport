@@ -71,6 +71,7 @@
 					<include>plugin.yml</include>
                     <include>config.yml</include>
                     <include>flags.yml</include>
+                    <include>message.yml</include>
 				</includes>
 			</resource>
 		</resources>
