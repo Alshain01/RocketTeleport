@@ -7,6 +7,7 @@ Message:
   RADIUS_ERROR: '&cThe entered radius is invalid.'
   ROCKET_ERROR: '&cYou do not have a rocket creation pending.'
   CREATION_ERROR: '&cYou already have a launch pad pending, use &6/rt land &cto complete it.'
+  LOCATION_ERROR: '&4Failed to locate suitable destination after {Retries} attempts.'
   #
   # Notifications
   #
@@ -15,6 +16,7 @@ Message:
   COMMAND_INSTRUCTION: '&bTrigger location set, use &6{Command} &bto create landing zone.'
   CANCEL_ROCKET: '&4Rocket LaunchPad creation canceled.'
   ROCKET_CREATED: '&aNew rocket created.'
+  TRIGGER_DESTROYED: '&4RocketTeleport Launchpad Destroyed.'
   #
   # Updater
   #

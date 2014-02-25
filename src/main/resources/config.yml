@@ -2,14 +2,25 @@
 # The number of attempts RocketTeleport will try to find a suitable random landing zone.
 #
 Retries: 500
+#
 # Lists the block types that a random rocket will not teleport to.  Underscores should be used instead of spaces.
 # Names are Material Types exactly as shown here: http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html
+#
 Exclusions:
   - AIR
   - LAVA
   - STATIONARY_LAVA
   - WATER
   - STATIONARY_WATER
+#
+# The sound that plays when a rocket is launched.  Underscores should be used instead of spaces.
+# Names are Sounds exactly as shown here: http://jd.bukkit.org/rb/apidocs/org/bukkit/Sound.html
+# Use NONE for no sound.
+#
+Sound:
+  Type: EXPLODE
+  Volume: 20
+  Pitch: 0
 #
 # He's running.  He's running. Are they gonna catch him? We don't know.
 # 20 = ~1 second

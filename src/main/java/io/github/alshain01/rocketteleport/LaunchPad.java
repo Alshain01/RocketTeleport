@@ -40,9 +40,11 @@ class LaunchPad {
 	//Stores a list of fully created and active rockets
 	private final Map<Location, Rocket> launchpads = new HashMap<Location, Rocket>();
 
-     /*
+    LaunchPad () { }
+
+    /*
      * Constructor used for loading existing data.
-    */
+     */
     LaunchPad(ConfigurationSection config) {
         Set<String> k = config.getKeys(false);
         for(String l : k) {
@@ -50,8 +52,6 @@ class LaunchPad {
             launchpads.put(r.getTrigger().getLocation(), new Rocket(config.getConfigurationSection(l).getValues(false)));
         }
     }
-
-    LaunchPad () { }
 
     /*
      * Write the data to the provided configuration section
@@ -70,7 +70,7 @@ class LaunchPad {
     boolean removeRocket(Player player, Location location) {
         if(launchpads.containsKey(location)) {
             launchpads.remove(location);
-            player.sendMessage(ChatColor.DARK_RED + "RocketTeleport Launchpad Destroyed.");
+            player.sendMessage(Message.TRIGGER_DESTROYED.get());
             return true;
         }
         return false;
@@ -101,36 +101,5 @@ class LaunchPad {
             counts.put(r.getType(), count);
         }
         return counts;
-    }
-
-    void liftOff(Player player, Location destination) {
-        if((int)player.getLocation().getY() < player.getWorld().getHighestBlockYAt(player.getLocation())) {
-            player.teleport(destination);
-            return;
-        }
-
-        player.getWorld().playSound(player.getLocation(), Sound.EXPLODE, 20, 0);
-        player.teleport(player.getLocation().add(0D,1D,0D)); // Prevents player from getting "stuck" on pressure plate
-        player.setVelocity(new org.bukkit.util.Vector(0D, 10D, 0D));
-        new Teleport(player, destination).runTaskLater(Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport"), 40);
-    }
-
-    /*
-     * Runnable class for handling delayed teleport
-     */
-    private class Teleport extends BukkitRunnable {
-        final Player player;
-        final Location destination;
-
-        Teleport(Player player, Location destination) {
-            this.player = player;
-            this.destination = destination;
-        }
-
-        @Override
-        public void run() {
-            player.setVelocity(new Vector(0D, 0D, 0D));
-            player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
-        }
     }
 }

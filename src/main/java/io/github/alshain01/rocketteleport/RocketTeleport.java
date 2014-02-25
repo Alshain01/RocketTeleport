@@ -43,6 +43,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access
 	LaunchPad launchPad;
+    MissionControl missionControl;
     Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
     Map<UUID, Rocket> rocketQueue = new HashMap<UUID, Rocket>();
 
@@ -52,6 +53,8 @@ public class RocketTeleport extends JavaPlugin {
         message = new CustomYML(this, "message.yml");
         message.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Rocket.class);
+
+        missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"));
 
         PluginManager pm = Bukkit.getPluginManager();
         ConfigurationSection updateConfig = getConfig().getConfigurationSection("Update");

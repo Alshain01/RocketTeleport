@@ -181,7 +181,7 @@ class PluginCommand implements CommandExecutor{
         }
 
         plugin.commandQueue.put(pID, action);
-        sender.sendMessage(Message.INSTRUCTION.get().replaceAll("\\{Type\\}", action.toString().toLowerCase()));
+        sender.sendMessage(Message.INSTRUCTION.get().replace("{Type}", action.toString().toLowerCase()));
         return true;
     }
 

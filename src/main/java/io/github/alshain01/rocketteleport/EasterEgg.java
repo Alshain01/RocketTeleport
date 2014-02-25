@@ -51,7 +51,7 @@ class EasterEgg {
         new MessageTask(player, "<&7Villager Console&f> Ahhh, we're going down!").runTaskLater(plugin, TIME * 8);
         new MessageTask(player, "<&8Villager Hellicopter&f> We're going down.").runTaskLater(plugin, TIME * (int)(TIME * 8.5));
         new RainVillagersTask(location).runTaskLater(plugin, TIME * 9);
-        new MessageTask(player, "<&3Villager #9&f> ...and that was the last we saw'r of those villagers.").runTaskLater(plugin, TIME * 10);
+        new MessageTask(player, "<&3Villager #9&f> ...and that was the last we saw of those villagers.").runTaskLater(plugin, TIME * 10);
     }
 
     private Location getDropLocation(Location landingArea) {
@@ -60,7 +60,7 @@ class EasterEgg {
         double z = (landingArea.getZ() - RADIUS) + Math.random() * (RADIUS*2);
         Location loc = new Location(landingArea.getWorld(), x, 0D, z);
         Block landing = loc.getWorld().getHighestBlockAt(loc);
-        return landing.getLocation().add(0, 25, 0);
+        return landing.getLocation().add(0, 30, 0);
     }
 
     private class MessageTask extends BukkitRunnable {
