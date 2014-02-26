@@ -15,15 +15,15 @@ commands:
     description: Warps you to a pre-set location.
     permission: rocketteleport.warp
     aliases: warps
-    usage: /warp <name>
+    usage: /warp [name]
   delwarp:
     description: Removes a warp location by warp name.
-    permission: rocketteleport.warp.delete
+    permission: rocketteleport.delwarp
     aliases: [remwarp, rmwarp]
     usage: /delwarp <name>
   setwarp:
     description: Defines a new warp location.
-    permission: rocketteleport.warp.set
+    permission: rocketteleport.setwarp
     aliases: createwarp
     usage: /setwarp <name>
 permission:
@@ -36,13 +36,9 @@ permission:
   rocketteleport.warp:
     description: Allows players to use the warp command.
     default: op
-  rocketteleport.warp.set:
+  rocketteleport.setwarp:
       description: Allows players to create warp locations.
       default: op
-      children:
-        rocketteleport.warp: true
-  rocketteleport.warp.delete:
+  rocketteleport.delwarp:
       description: Allows players to delete warp locations.
       default: op
-      children:
-        rocketteleport.warp: true
