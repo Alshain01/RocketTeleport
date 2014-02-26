@@ -157,7 +157,7 @@ class PluginCommand implements CommandExecutor{
                 plugin.commandQueue.put(pID, action);
                 plugin.rocketQueue.put(pID, new Rocket(RocketType.ELEMENT));
                 sender.sendMessage(ChatColor.GOLD +
-                        "Right click the button or plate to use as an " + ChatColor.BLUE +
+                        "Left click the button or plate to use as an " + ChatColor.BLUE +
                         "Element Animation" + ChatColor.GOLD + " rocket trigger.");
                 return true;
             case SOFT:
