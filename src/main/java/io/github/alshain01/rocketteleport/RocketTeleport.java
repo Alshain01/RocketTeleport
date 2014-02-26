@@ -43,7 +43,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access
 	LaunchPad launchPad;
+    WarpCommand warpController;
     MissionControl missionControl;
+
     Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
     Map<UUID, Rocket> rocketQueue = new HashMap<UUID, Rocket>();
 
@@ -78,12 +80,15 @@ public class RocketTeleport extends JavaPlugin {
         CustomYML data = new CustomYML(this, "data.yml");
         data.getConfig().createSection("LaunchPads"); //Overwrite every time
         launchPad.write(data.getConfig().getConfigurationSection("LaunchPads"));
+        data.getConfig().createSection("Warps"); //Overwrite every time
+        warpController.write(data.getConfig().getConfigurationSection("Warps"));
         data.saveConfig();
     }
 
     void reload() {
         writeData();
         this.reloadConfig();
+        missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"));
         message.reload();
         loadData();
     }
@@ -99,6 +104,13 @@ public class RocketTeleport extends JavaPlugin {
         } else {
             launchPad = new LaunchPad();
         }
+
+        if(data.getConfig().isConfigurationSection("Warps")) {
+            warpController = new WarpCommand(this);
+        } else {
+            warpController = new WarpCommand(this, data.getConfig().getConfigurationSection("Warps"));
+        }
+        getCommand("warp").setExecutor(warpController);
     }
 
     @Override

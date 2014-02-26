@@ -23,6 +23,11 @@
             <id>flags-repo</id>
             <url>http://pages.suddenlink.net/alshain01/flags/repository</url>
         </repository>
+
+        <repository>
+            <id>ess-repo</id>
+            <url>http://repo.ess3.net/content/groups/essentials</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
@@ -43,6 +48,13 @@
                     <artifactId>bukkit</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>net.ess3</groupId>
+            <artifactId>Essentials</artifactId>
+            <version>RELEASE</version>
+            <optional>true</optional>
         </dependency>
 	</dependencies>
 	

@@ -11,6 +11,10 @@ commands:
     permission: rocketteleport.command
     aliases: rt
     usage: /rocketteleport <RocketType> [Radius]
+  warp:
+    description: Allows players to use and manage rocket warps
+    permission: rocketteleport.warp
+    usage: /warp <name>
 permission:
   rocketteleport.command:
     description: Allows access to the rocketteleport command.
@@ -18,3 +22,16 @@ permission:
   rocketteleport.admin.notifyupdate:
     description: Notifies players when an update to RocketTeleport is available.
     default: op
+  rocketteleport.warp:
+    description: Allows players to use the warp command.
+    default: op
+  rocketteleport.warp.set:
+      description: Allows players to create warp locations.
+      default: op
+      children:
+        rocketteleport.warp: true
+  rocketteleport.warp.delete:
+      description: Allows players to delete warp locations.
+      default: op
+      children:
+        rocketteleport.warp: true
