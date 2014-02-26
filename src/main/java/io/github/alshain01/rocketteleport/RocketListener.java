@@ -5,10 +5,7 @@ import io.github.alshain01.flags.System;
 import io.github.alshain01.flags.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
 import io.github.alshain01.rocketteleport.Rocket.RocketLocation;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -116,19 +113,19 @@ class RocketListener implements Listener {
 
             Rocket rocket = plugin.launchPad.getRocket(block.getLocation());
             List<RocketLocation> possibleDestinations = rocket.getDestination();
-            Location destination = possibleDestinations.get(new Random().nextInt(possibleDestinations.size() - 1)).getLocation();
+            Location destination = possibleDestinations.get((int)(Math.random()*(possibleDestinations.size() -1))).getLocation();
 
             switch(rocket.getType()) {
                 case ELEMENT:
                     Plugin plugin = Bukkit.getPluginManager().getPlugin("RocketTeleport");
-                    if(easterEggTimeout) {
+                    if(!easterEggTimeout) {
                         new EasterEgg().run(player, destination);
-                        easterEggTimeout = false;
+                        easterEggTimeout = true;
                         new BukkitRunnable() {
                             public void run() {
-                                easterEggTimeout = true;
+                                easterEggTimeout = false;
                             }
-                        }.runTaskLater(plugin, plugin.getConfig().getInt("EasterEggTimeout"));
+                        }.runTaskLater(plugin, plugin.getConfig().getInt("EasterEggTimeout") * 60 * 20);
                     } else {
                         double timeout = plugin.getConfig().getInt("EasterEggTimeout") / 60 / 20;
                         player.sendMessage(ChatColor.RED + "This can only be used once every " + timeout + " minutes server wide.");
@@ -138,7 +135,7 @@ class RocketListener implements Listener {
                     // Get a random radius around the location
                     destination = getRandomLocation(destination, rocket.getRadius());
                     if(destination == null) {
-                        player.sendMessage(Message.LOCATION_ERROR.get().replace("Retries", String.valueOf(retries)));
+                        player.sendMessage(Message.LOCATION_ERROR.get().replace("{Retries}", String.valueOf(retries)));
                         return;
                     }
                     break;
@@ -146,6 +143,7 @@ class RocketListener implements Listener {
                     destination = destination.add(0D, 75D, 0D);
                     break;
                 default:
+                    java.lang.System.out.print("Default Flag Type");
                     break;
             }
 
@@ -173,16 +171,9 @@ class RocketListener implements Listener {
             double z = (landingArea.getZ() - radius) + Math.random() * (radius*2);
             Location loc = new Location(landingArea.getWorld(), x, 0D, z);
             landing = loc.getWorld().getHighestBlockAt(loc);
-            count ++;
-        } while (invalidType(landing.getType()) && count <= retries);
+            count++;
+        } while (exclusions.contains(landing.getType()) && count <= retries);
         if(count > retries) { return null; }
         return landing.getLocation().add(0, 1, 0);
-    }
-
-    private boolean invalidType(Material type) {
-        for(Material m : exclusions) {
-            if(type.equals(m)) { return true; }
-        }
-        return false;
     }
 }

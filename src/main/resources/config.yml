@@ -7,7 +7,6 @@ Retries: 500
 # Names are Material Types exactly as shown here: http://jd.bukkit.org/rb/apidocs/org/bukkit/Material.html
 #
 Exclusions:
-  - AIR
   - LAVA
   - STATIONARY_LAVA
   - WATER

@@ -39,17 +39,16 @@ class EasterEgg {
 
     void run(Player player, Location location) {
 
-        player.sendMessage("<&1Villager Police&f> Stop!");
+        new MessageTask(player, "<&1Villager Police&f> Stop!").runTask(plugin);
         new MessageTask(player, "<&6" + player.getName() + "&f> No.").runTaskLater(plugin, TIME);
-        new MessageTask(player, "<&1Villager Police&f> Aww, he said no.").runTaskLater(plugin, TIME * 2);
-        new RocketVillagerTask(location).runTaskLater(plugin, TIME * 3);
+        new PrepareRocketVillagerTask(player, location).runTaskLater(plugin, TIME * 2);
         new MessageTask(player, "<&7Villager Console&f> Beep. Beep. Beep. Beep. Missile inbound!").runTaskLater(plugin, TIME * 4);
         new MessageTask(player, "<&2Villager Reporter&f> WHAT?!").runTaskLater(plugin, TIME * 5);
         new MessageTask(player, "<&7Villager Console&f> Deploying flares!").runTaskLater(plugin, (int)(TIME * 5.5));
         new MessageTask(player, "<&8Villager Hellicopter&f> Deploying flares.").runTaskLater(plugin, TIME * 6);
-        new FireworkTask(location.add(0D, 45D, 0D)).runTaskLater(plugin, TIME * 7);
+        new FireworkTask(location.add(0D, 20D, 0D)).runTaskLater(plugin, TIME * 7);
         new MessageTask(player, "<&7Villager Console&f> Ahhh, we're going down!").runTaskLater(plugin, TIME * 8);
-        new MessageTask(player, "<&8Villager Hellicopter&f> We're going down.").runTaskLater(plugin, TIME * (int)(TIME * 8.5));
+        new MessageTask(player, "<&8Villager Hellicopter&f> We're going down.").runTaskLater(plugin, (int)(TIME * 8.5));
         new RainVillagersTask(location).runTaskLater(plugin, TIME * 9);
         new MessageTask(player, "<&3Villager #9&f> ...and that was the last we saw of those villagers.").runTaskLater(plugin, TIME * 10);
     }
@@ -78,17 +77,34 @@ class EasterEgg {
         }
     }
 
-    private class RocketVillagerTask extends BukkitRunnable {
-        final Location location;
-
-        RocketVillagerTask(Location location) {
+    private class PrepareRocketVillagerTask extends BukkitRunnable {
+        Player player;
+        Location location;
+        PrepareRocketVillagerTask(Player player, Location location) {
+            this.player = player;
             this.location = location;
         }
+
+        @Override
         public void run() {
-            Entity entity = location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+            new MessageTask(player, "<&1Villager Police&f> Aww, he said no.").runTask(plugin);
+            Entity entity = location.getWorld().spawnEntity(location.getWorld().getHighestBlockAt(location).getLocation(), EntityType.VILLAGER);
+            new RocketVillagerTask(entity).runTaskLater(plugin, TIME);
+        }
+
+
+    }
+
+    private class RocketVillagerTask extends BukkitRunnable {
+        final Entity entity;
+
+        RocketVillagerTask(Entity entity) {
+            this.entity = entity;
+        }
+        public void run() {
             entity.getWorld().playSound(entity.getLocation(), Sound.EXPLODE, 20, 0);
             entity.teleport(entity.getLocation().add(0D, 1D, 0D)); // Prevents player from getting "stuck" on pressure plate
-            entity.setVelocity(new Vector(0D, 10D, 0D));
+            entity.setVelocity(new Vector(0D, 5D, 0D));
             new DespawnTask(entity).runTaskLater(plugin, TIME);
         }
     }

@@ -51,10 +51,16 @@ public class Rocket implements ConfigurationSerializable {
         private final String world;
         private final double coords[] = new double[3];
 
-        RocketLocation(Location location) {
-            coords[0] = getMidpoint(location.getX()) ;
-            coords[1] = Math.ceil(location.getY());
-            coords[2] = getMidpoint(location.getZ());
+        RocketLocation(Location location, boolean normalize) {
+            if(normalize) {
+                coords[0] = location.getBlockX() + 0.5;
+                coords[1] = location.getBlockY() + 1;
+                coords[2] = location.getBlockZ() + 0.5;;
+            } else {
+                coords[0] = location.getX() ;
+                coords[1] = location.getY();
+                coords[2] = location.getZ();
+            }
             world = location.getWorld().getName();
         }
 
@@ -156,12 +162,12 @@ public class Rocket implements ConfigurationSerializable {
 	}
 	
 	Rocket setTrigger(Location trigger) {
-        this.trigger = new RocketLocation(trigger);
+        this.trigger = new RocketLocation(trigger, false);
         return this;
     }
 	
 	Rocket addDestination(Location destination) {
-        this.destination.add(new RocketLocation(destination));
+        this.destination.add(new RocketLocation(destination, true));
         return this;
     }
 }
