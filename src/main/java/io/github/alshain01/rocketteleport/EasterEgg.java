@@ -39,7 +39,7 @@ class EasterEgg {
 
     void run(Player player, Location location) {
 
-        new MessageTask(player, "<&1Villager Police&f> Stop!").runTask(plugin);
+        new MessageTask(player, "<&9Villager Police&f> Stop!").runTask(plugin);
         new MessageTask(player, "<&6" + player.getName() + "&f> No.").runTaskLater(plugin, TIME);
         new PrepareRocketVillagerTask(player, location).runTaskLater(plugin, TIME * 2);
         new MessageTask(player, "<&7Villager Console&f> Beep. Beep. Beep. Beep. Missile inbound!").runTaskLater(plugin, TIME * 4);
@@ -87,7 +87,7 @@ class EasterEgg {
 
         @Override
         public void run() {
-            new MessageTask(player, "<&1Villager Police&f> Aww, he said no.").runTask(plugin);
+            new MessageTask(player, "<&9Villager Police&f> Aww, he said no.").runTask(plugin);
             Entity entity = location.getWorld().spawnEntity(location.getWorld().getHighestBlockAt(location).getLocation(), EntityType.VILLAGER);
             new RocketVillagerTask(entity).runTaskLater(plugin, TIME);
         }

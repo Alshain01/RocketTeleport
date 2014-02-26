@@ -85,16 +85,6 @@ public class Rocket implements ConfigurationSerializable {
         public Location getLocation() {
             return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2]);
         }
-
-        private double getMidpoint(double value) {
-            if (value < 0) {
-                value = Math.ceil(value);
-                return value - 0.5;
-            } else {
-                value = Math.floor(value);
-                return value + 0.5;
-            }
-        }
     }
 
 	private final RocketType type;
