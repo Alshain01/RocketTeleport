@@ -143,7 +143,6 @@ class RocketListener implements Listener {
                     destination = destination.add(0D, 75D, 0D);
                     break;
                 default:
-                    java.lang.System.out.print("Default Flag Type");
                     break;
             }
 
