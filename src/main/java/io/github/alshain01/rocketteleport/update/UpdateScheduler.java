@@ -1,9 +1,8 @@
 package io.github.alshain01.rocketteleport.update;
 
-import io.github.alshain01.rocketteleport.Message;
+
 import io.github.alshain01.rocketteleport.update.Updater.UpdateResult;
 import io.github.alshain01.rocketteleport.update.Updater.UpdateType;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;

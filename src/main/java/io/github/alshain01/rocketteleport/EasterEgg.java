@@ -78,8 +78,8 @@ class EasterEgg {
     }
 
     private class PrepareRocketVillagerTask extends BukkitRunnable {
-        Player player;
-        Location location;
+        final Player player;
+        final Location location;
         PrepareRocketVillagerTask(Player player, Location location) {
             this.player = player;
             this.location = location;

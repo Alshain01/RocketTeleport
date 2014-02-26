@@ -29,12 +29,9 @@ import io.github.alshain01.rocketteleport.Rocket.RocketType;
 
 import java.util.*;
 
-import org.bukkit.*;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 class LaunchPad {
 	//Stores a list of fully created and active rockets
@@ -67,17 +64,15 @@ class LaunchPad {
         launchpads.put(rocket.getTrigger().getLocation(), rocket);
     }
 
-    boolean removeRocket(Player player, Location location) {
+    void removeRocket(Player player, Location location) {
         if(launchpads.containsKey(location)) {
             launchpads.remove(location);
             player.sendMessage(Message.TRIGGER_DESTROYED.get());
-            return true;
         }
-        return false;
     }
 
-    boolean hasRocket(Location location) {
-        return launchpads.containsKey(location);
+    boolean noRocket(Location location) {
+        return !launchpads.containsKey(location);
     }
 
     Rocket getRocket(Location location) {

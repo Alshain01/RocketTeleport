@@ -12,9 +12,9 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WarpCommand implements CommandExecutor {
-    Map<String, WarpLocation> warps = new HashMap<String, WarpLocation>();
-    RocketTeleport plugin;
+class WarpCommand implements CommandExecutor {
+    final private Map<String, WarpLocation> warps = new HashMap<String, WarpLocation>();
+    final private RocketTeleport plugin;
 
     WarpCommand(RocketTeleport plugin) {
         this.plugin = plugin;
@@ -75,8 +75,9 @@ public class WarpCommand implements CommandExecutor {
             boolean first = true;
             for(String s : warps.keySet()) {
                 if(!first) {
-                    first = false;
                     warpNames.append(", ");
+                } else {
+                    first = false;
                 }
                 warpNames.append(s);
             }

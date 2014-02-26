@@ -43,11 +43,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access
 	LaunchPad launchPad;
-    WarpCommand warpController;
+    private WarpCommand warpController;
     MissionControl missionControl;
 
-    Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
-    Map<UUID, Rocket> rocketQueue = new HashMap<UUID, Rocket>();
+    final Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
+    final Map<UUID, Rocket> rocketQueue = new HashMap<UUID, Rocket>();
 
     @Override
 	public void onEnable() {
@@ -129,7 +129,7 @@ public class RocketTeleport extends JavaPlugin {
      * first server tick.
      */
     private class ServerEnabledTasks extends BukkitRunnable {
-        RocketTeleport plugin;
+        final RocketTeleport plugin;
         ServerEnabledTasks(RocketTeleport plugin) {
             this.plugin = plugin;
         }

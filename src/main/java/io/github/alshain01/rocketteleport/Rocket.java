@@ -55,7 +55,7 @@ public class Rocket implements ConfigurationSerializable {
             if(normalize) {
                 coords[0] = location.getBlockX() + 0.5;
                 coords[1] = location.getBlockY() + 1;
-                coords[2] = location.getBlockZ() + 0.5;;
+                coords[2] = location.getBlockZ() + 0.5;
             } else {
                 coords[0] = location.getX() ;
                 coords[1] = location.getY();
@@ -131,7 +131,7 @@ public class Rocket implements ConfigurationSerializable {
         rocket.put("Trigger", trigger.toString());
         rocket.put("Radius", radius);
 
-        List destinations = new ArrayList<String>();
+        List<String> destinations = new ArrayList<String>();
         for(RocketLocation l : destination) {
             destinations.add(l.toString());
         }

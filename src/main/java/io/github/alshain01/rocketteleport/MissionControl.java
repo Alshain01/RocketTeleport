@@ -9,10 +9,10 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-public class MissionControl {
-    private Sound sound;
-    private float volume;
-    private float pitch;
+class MissionControl {
+    final private Sound sound;
+    final private float volume;
+    final private float pitch;
 
     MissionControl(ConfigurationSection sound) {
         this.sound = Sound.valueOf(sound.getString("Type"));

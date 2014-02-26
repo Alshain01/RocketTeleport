@@ -1,6 +1,8 @@
 package io.github.alshain01.rocketteleport;
 
-import io.github.alshain01.flags.*;
+import io.github.alshain01.flags.Flags;
+import io.github.alshain01.flags.ModuleYML;
+import io.github.alshain01.flags.Flag;
 import io.github.alshain01.flags.System;
 import io.github.alshain01.flags.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
@@ -30,8 +32,8 @@ class RocketListener implements Listener {
     private final RocketTeleport plugin;
     private final int retries;
     private boolean easterEggTimeout;
-    private Set<Material> exclusions = new HashSet<Material>();
-    private Map<String, Object> flags = new HashMap<String, Object>();
+    private final Set<Material> exclusions = new HashSet<Material>();
+    private final Map<String, Object> flags = new HashMap<String, Object>();
 
     RocketListener(RocketTeleport plugin) {
         this.plugin = plugin;
@@ -105,7 +107,7 @@ class RocketListener implements Listener {
             plugin.commandQueue.remove(pID);
         } else if ((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.PHYSICAL) && TRIGGER_TYPES.contains(block.getType())) {
             // Rocket Use
-            if(!plugin.launchPad.hasRocket(block.getLocation())) { return; }
+            if(plugin.launchPad.noRocket(block.getLocation())) { return; }
             if(isFlagSet(flags.get("UseRocket"), player, e.getClickedBlock().getLocation())) { return; }
 
             // Undo anti-grief measures for rockets.
