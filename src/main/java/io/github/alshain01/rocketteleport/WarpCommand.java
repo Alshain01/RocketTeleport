@@ -65,81 +65,68 @@ class WarpCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length < 1) {
+        if(command.toString().equalsIgnoreCase("warp")) {
             if(!sender.hasPermission("rocketteleport.warp")) {
                 sender.sendMessage(Message.COMMAND_ERROR.get());
                 return true;
             }
 
-            StringBuilder warpNames = new StringBuilder();
-            boolean first = true;
-            for(String s : warps.keySet()) {
-                if(!first) {
-                    warpNames.append(", ");
-                } else {
-                    first = false;
+            if (args.length < 1) {
+                StringBuilder warpNames = new StringBuilder();
+                boolean first = true;
+                for(String s : warps.keySet()) {
+                    if(!first) {
+                        warpNames.append(", ");
+                    } else {
+                        first = false;
+                    }
+                    warpNames.append(s);
                 }
-                warpNames.append(s);
+                warpNames.append(".");
+
+                sender.sendMessage(Message.WARP_LIST.get().replace("{Warps}", warpNames.toString()));
+            } else {
+                if(!(sender instanceof Player)) {
+                    sender.sendMessage(Message.CONSOLE_ERROR.get());
+                } else {
+                    // Warp to destination
+                    if(warps.containsKey(args[0])) {
+                        plugin.missionControl.liftOff((Player)sender, warps.get(args[0]).getLocation());
+                    } else {
+                        sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
+                    }
+                }
             }
-            warpNames.append(".");
-
-            sender.sendMessage(Message.WARP_LIST.get().replace("{Warps}", warpNames.toString()));
             return true;
-        }
-
-        /*
-         * Handle the Deletion of a warp
-         */
-        if(args[0].equalsIgnoreCase("delete")) {
+        } else if (command.toString().equalsIgnoreCase("delwarp")) {
             if(!sender.hasPermission("rocketteleport.warp.delete")) {
                 sender.sendMessage(Message.COMMAND_ERROR.get());
                 return true;
             }
 
-            if(args.length < 2) {
-                sender.sendMessage("/warp delete <name>");
-                return true;
-            }
-
+            if(args.length < 1) { return false; }
             if(warps.remove(args[1]) != null) {
                 sender.sendMessage(Message.WARP_REMOVED.get().replace("{Warp}", args[1]));
             } else {
                 sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[1]));
             }
-        } else {
+        } else if (command.toString().equalsIgnoreCase("setwarp")) {
             // All the remaining commands require a player
             if(!(sender instanceof Player)) {
-                sender.sendMessage("/warp <delete> <name>");
+                sender.sendMessage(Message.CONSOLE_ERROR.get());
                 return true;
             }
 
-            if(args[0].equalsIgnoreCase("set")) {
-                if(!sender.hasPermission("rocketteleport.warp.set")) {
-                    sender.sendMessage(Message.COMMAND_ERROR.get());
-                    return true;
-                }
-
-                if (args.length < 2) {
-                    sender.sendMessage("/warp set <name>");
-                    return true;
-                }
-
-                warps.put(args[1], new WarpLocation(((Player) sender).getLocation()));
-                sender.sendMessage(Message.WARP_CREATED.get());
-            } else {
-                if(!sender.hasPermission("rocketteleport.warp")) {
-                    sender.sendMessage(Message.COMMAND_ERROR.get());
-                    return true;
-                }
-
-                // Warp to destination
-                if(warps.containsKey(args[0])) {
-                    plugin.missionControl.liftOff((Player)sender, warps.get(args[0]).getLocation());
-                    return true;
-                }
+            if (args.length < 1) { return false; }
+            if(!sender.hasPermission("rocketteleport.warp.set")) {
+                sender.sendMessage(Message.COMMAND_ERROR.get());
+                return true;
             }
-            sender.sendMessage("/warp <name>");
+
+            warps.put(args[1], new WarpLocation(((Player) sender).getLocation()));
+            sender.sendMessage(Message.WARP_CREATED.get());
+            return true;
         }
-        return true;
+        return false;
     }
 }

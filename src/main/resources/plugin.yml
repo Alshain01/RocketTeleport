@@ -12,9 +12,20 @@ commands:
     aliases: rt
     usage: /rocketteleport <RocketType> [Radius]
   warp:
-    description: Allows players to use and manage rocket warps
+    description: Warps you to a pre-set location.
     permission: rocketteleport.warp
+    aliases: warps
     usage: /warp <name>
+  delwarp:
+    description: Removes a warp location by warp name.
+    permission: rocketteleport.warp.delete
+    aliases: [remwarp, rmwarp]
+    usage: /delwarp <name>
+  setwarp:
+    description: Defines a new warp location.
+    permission: rocketteleport.warp.set
+    aliases: createwarp
+    usage: /setwarp <name>
 permission:
   rocketteleport.command:
     description: Allows access to the rocketteleport command.

@@ -3,6 +3,7 @@ Message:
   # Errors
   #
   COMMAND_ERROR: '&cYou do not have permission to use that command.'
+  CONSOLE_ERROR: '&cThis command cannot be used from the console.'
   CANCEL_ERROR: '&cThere is no pending LaunchPad creation.'
   RADIUS_ERROR: '&cThe entered radius is invalid.'
   ROCKET_ERROR: '&cYou do not have a rocket creation pending.'

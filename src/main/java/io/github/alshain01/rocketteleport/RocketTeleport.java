@@ -111,6 +111,8 @@ public class RocketTeleport extends JavaPlugin {
             warpController = new WarpCommand(this, data.getConfig().getConfigurationSection("Warps"));
         }
         getCommand("warp").setExecutor(warpController);
+        getCommand("delwarp").setExecutor(warpController);
+        getCommand("setwarp").setExecutor(warpController);
     }
 
     @Override
