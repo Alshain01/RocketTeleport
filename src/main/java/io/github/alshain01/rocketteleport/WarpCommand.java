@@ -99,7 +99,7 @@ class WarpCommand implements CommandExecutor {
             }
             return true;
         } else if (command.toString().equalsIgnoreCase("delwarp")) {
-            if(!sender.hasPermission("rocketteleport.warp.delete")) {
+            if(!sender.hasPermission("rocketteleport.delwarp")) {
                 sender.sendMessage(Message.COMMAND_ERROR.get());
                 return true;
             }
@@ -118,7 +118,7 @@ class WarpCommand implements CommandExecutor {
             }
 
             if (args.length < 1) { return false; }
-            if(!sender.hasPermission("rocketteleport.warp.set")) {
+            if(!sender.hasPermission("rocketteleport.setwarp")) {
                 sender.sendMessage(Message.COMMAND_ERROR.get());
                 return true;
             }
