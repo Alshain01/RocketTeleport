@@ -101,6 +101,8 @@ class EasterEgg {
         RocketVillagerTask(Entity entity) {
             this.entity = entity;
         }
+
+        @Override
         public void run() {
             entity.getWorld().playSound(entity.getLocation(), Sound.EXPLODE, 20, 0);
             entity.teleport(entity.getLocation().add(0D, 1D, 0D)); // Prevents player from getting "stuck" on pressure plate
@@ -115,6 +117,7 @@ class EasterEgg {
             this.location = location;
         }
 
+        @Override
         public void run() {
             for(int x = 0; x < 15; x++) {
                 Entity entity = location.getWorld().spawnEntity(getDropLocation(location), EntityType.VILLAGER);
@@ -130,6 +133,7 @@ class EasterEgg {
             this.entity = entity;
         }
 
+        @Override
         public void run() {
             entity.remove();
         }

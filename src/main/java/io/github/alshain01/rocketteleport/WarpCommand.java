@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 class WarpCommand implements CommandExecutor {
     final private Map<String, WarpLocation> warps = new HashMap<String, WarpLocation>();
@@ -49,7 +50,6 @@ class WarpCommand implements CommandExecutor {
 
         WarpLocation(String location) {
             String[] arg = location.split(",");
-
             world = arg[0];
             for (int a = 0; a < 3; a++) {
                 coords[a] = Double.parseDouble(arg[a+1]);
