@@ -38,9 +38,12 @@ class WarpCommand implements CommandExecutor {
         private final double coords[] = new double[3];
 
         WarpLocation(Location location) {
-            coords[0] = location.getBlockX() + 0.5;
+            // Adjust coordinates to center block.
+            // Use absolute value to produce 1 or -1 in order to
+            // add 0.5 if the coord is positive, subtract if the coord is negative
+            coords[0] = location.getBlockX() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
             coords[1] = location.getBlockY() + 1;
-            coords[2] = location.getBlockZ() + 0.5;
+            coords[2] = location.getBlockZ() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
             world = location.getWorld().getName();
         }
 
