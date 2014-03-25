@@ -4,6 +4,7 @@ import com.earth2me.essentials.Essentials;
 import net.ess3.api.InvalidWorldException;
 import com.earth2me.essentials.commands.WarpNotFoundException;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -58,6 +59,7 @@ class WarpCommand implements CommandExecutor {
     private class WarpLocation {
         private final String world;
         private final double coords[] = new double[3];
+        private final float view[] = new float[2];
 
         WarpLocation(Location location, boolean adjustY) {
             // Adjust coordinates to center block.
@@ -67,6 +69,8 @@ class WarpCommand implements CommandExecutor {
             coords[1] = location.getBlockY() + (adjustY ? 1 : 0);
             coords[2] = location.getBlockZ() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
             world = location.getWorld().getName();
+            view[0] = location.getYaw();
+            view[1] = location.getPitch();
         }
 
         WarpLocation(String location) {
@@ -76,15 +80,23 @@ class WarpCommand implements CommandExecutor {
             for (int a = 0; a < 3; a++) {
                 coords[a] = Double.parseDouble(arg[a+1]);
             }
+
+            if(arg.length > 4) {
+                view[0] = Float.parseFloat(arg[4]);
+                view[1] = Float.parseFloat(arg[5]);
+            } else {
+                view[0] = 0;
+                view[1] = 0;
+            }
         }
 
         @Override
         public String toString() {
-            return world + "," + coords[0] + "," + coords[1] + "," + coords[2];
+            return world + "," + coords[0] + "," + coords[1] + "," + coords[2] + "," + view[0] + "," + view[1];
         }
 
         public Location getLocation() {
-            return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2]);
+            return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2], view[0], view[1]);
         }
     }
 
@@ -151,7 +163,15 @@ class WarpCommand implements CommandExecutor {
             }
 
             warps.put(args[0], new WarpLocation(((Player) sender).getLocation(), true));
-            sender.sendMessage(Message.WARP_CREATED.get());
+            sender.sendMessage(Message.WARP_CREATED.get().replace("{Warp}", args[0]));
+            if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
+                Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
+                try {
+                    essentials.getWarps().setWarp(args[0], ((Player) sender).getLocation());
+                } catch (Exception ex) {
+                    sender.sendMessage(ChatColor.RED + "RocketTeleport Error: " + ChatColor.DARK_RED + "Failed to mirror new warp in Essentials.");
+                }
+            }
             return true;
         }
         return false;
