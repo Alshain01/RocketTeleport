@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 class WarpCommand implements CommandExecutor {
     final private Map<String, WarpLocation> warps = new HashMap<String, WarpLocation>();

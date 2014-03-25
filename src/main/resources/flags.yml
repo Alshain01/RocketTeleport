@@ -4,16 +4,16 @@ Flag:
     Default: true
     Player: true
     AreaMessage: '&cYou are not allowed to create rockets in &6{Owner}&c''s {AreaType} area.'
-    WorldMessage: '&cYou are not allowed to create rockets in &6{World}&c.'
+    WildernessMessage: '&cYou are not allowed to create rockets in &6{World}&c.'
   SetRocketLanding:
     Description: 'Allows players to create a RocketTeleport landing zone in the area.'
     Default: true
     Player: true
     AreaMessage: '&cYou are not allowed to set landing zones in &6{Owner}&c''s {AreaType} area.'
-    WorldMessage: '&cYou are not allowed to set landing zones in &6{World}&c.'
+    WildernessMessage: '&cYou are not allowed to set landing zones in &6{World}&c.'
   UseRocket:
     Description: 'Allows players to use a rockets in the area.'
     Default: true
     Player: true
     AreaMessage: '&cYou are not allowed to use rockets in &6{Owner}&c''s {AreaType} area.'
-    WorldMessage: '&cYou are not allowed to use rockets in &6{World}&c.'
+    WildernessMessage: '&cYou are not allowed to use rockets in &6{World}&c.'

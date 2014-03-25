@@ -1,9 +1,6 @@
 package io.github.alshain01.rocketteleport;
 
-import io.github.alshain01.flags.Flags;
-import io.github.alshain01.flags.ModuleYML;
-import io.github.alshain01.flags.Flag;
-import io.github.alshain01.flags.System;
+import io.github.alshain01.flags.*;
 import io.github.alshain01.flags.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
 import io.github.alshain01.rocketteleport.Rocket.RocketLocation;
@@ -155,7 +152,7 @@ class RocketListener implements Listener {
     private boolean isFlagSet(Object flag, Player player, Location location) {
         if(flag == null) { return false; }
         Flag f = (Flag)flag;
-        Area area = System.getActive().getAreaAt(location);
+        Area area = CuboidType.getActive().getAreaAt(location);
 
         if(!area.getValue(f, false) && !player.hasPermission(f.getBypassPermission()) && !area.hasTrust(f, player)) {
             player.sendMessage(area.getMessage(f, player.getName()));
