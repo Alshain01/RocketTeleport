@@ -1,5 +1,8 @@
 package io.github.alshain01.rocketteleport;
 
+import com.earth2me.essentials.Essentials;
+import net.ess3.api.InvalidWorldException;
+import com.earth2me.essentials.commands.WarpNotFoundException;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -18,12 +21,31 @@ class WarpCommand implements CommandExecutor {
 
     WarpCommand(RocketTeleport plugin) {
         this.plugin = plugin;
+        importEssentials();
     }
 
     WarpCommand(RocketTeleport plugin, ConfigurationSection data) {
         this.plugin = plugin;
         for(String s : data.getKeys(false)) {
             this.warps.put(s, new WarpLocation(data.getString(s)));
+        }
+
+        importEssentials();
+    }
+
+    void importEssentials() {
+        if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
+            Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
+            for(String w : essentials.getWarps().getList()) {
+                if(warps.containsKey(w)) { continue; }
+                try {
+                    warps.put(w, new WarpLocation(essentials.getWarps().getWarp(w), false));
+                } catch (WarpNotFoundException ex) {
+                    plugin.getLogger().info("Failed to import Essentials warp " + w);
+                } catch (InvalidWorldException ex) {
+                    plugin.getLogger().info("Failed to import Essentials warp " + w);
+                }
+            }
         }
     }
 
@@ -37,12 +59,12 @@ class WarpCommand implements CommandExecutor {
         private final String world;
         private final double coords[] = new double[3];
 
-        WarpLocation(Location location) {
+        WarpLocation(Location location, boolean adjustY) {
             // Adjust coordinates to center block.
             // Use absolute value to produce 1 or -1 in order to
             // add 0.5 if the coord is positive, subtract if the coord is negative
             coords[0] = location.getBlockX() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
-            coords[1] = location.getBlockY() + 1;
+            coords[1] = location.getBlockY() + (adjustY ? 1 : 0);
             coords[2] = location.getBlockZ() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
             world = location.getWorld().getName();
         }
@@ -125,7 +147,7 @@ class WarpCommand implements CommandExecutor {
                 return true;
             }
 
-            warps.put(args[1], new WarpLocation(((Player) sender).getLocation()));
+            warps.put(args[1], new WarpLocation(((Player) sender).getLocation(), true));
             sender.sendMessage(Message.WARP_CREATED.get());
             return true;
         }
