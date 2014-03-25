@@ -71,6 +71,7 @@ class WarpCommand implements CommandExecutor {
 
         WarpLocation(String location) {
             String[] arg = location.split(",");
+
             world = arg[0];
             for (int a = 0; a < 3; a++) {
                 coords[a] = Double.parseDouble(arg[a+1]);
@@ -89,7 +90,7 @@ class WarpCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(command.toString().equalsIgnoreCase("warp")) {
+        if(command.getName().equalsIgnoreCase("warp")) {
             if(!sender.hasPermission("rocketteleport.warp")) {
                 sender.sendMessage(Message.COMMAND_ERROR.get());
                 return true;
@@ -115,6 +116,7 @@ class WarpCommand implements CommandExecutor {
                 } else {
                     // Warp to destination
                     if(warps.containsKey(args[0])) {
+                        sender.sendMessage(Message.WARP_ACTION.get().replace("{Warp}", args[0]));
                         plugin.missionControl.liftOff((Player)sender, warps.get(args[0]).getLocation());
                     } else {
                         sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
@@ -122,19 +124,20 @@ class WarpCommand implements CommandExecutor {
                 }
             }
             return true;
-        } else if (command.toString().equalsIgnoreCase("delwarp")) {
+        } else if (command.getName().equalsIgnoreCase("delwarp")) {
             if(!sender.hasPermission("rocketteleport.delwarp")) {
                 sender.sendMessage(Message.COMMAND_ERROR.get());
                 return true;
             }
 
             if(args.length < 1) { return false; }
-            if(warps.remove(args[1]) != null) {
-                sender.sendMessage(Message.WARP_REMOVED.get().replace("{Warp}", args[1]));
+            if(warps.remove(args[0]) != null) {
+                sender.sendMessage(Message.WARP_REMOVED.get().replace("{Warp}", args[0]));
             } else {
-                sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[1]));
+                sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
             }
-        } else if (command.toString().equalsIgnoreCase("setwarp")) {
+            return true;
+        } else if (command.getName().equalsIgnoreCase("setwarp")) {
             // All the remaining commands require a player
             if(!(sender instanceof Player)) {
                 sender.sendMessage(Message.CONSOLE_ERROR.get());
@@ -147,7 +150,7 @@ class WarpCommand implements CommandExecutor {
                 return true;
             }
 
-            warps.put(args[1], new WarpLocation(((Player) sender).getLocation(), true));
+            warps.put(args[0], new WarpLocation(((Player) sender).getLocation(), true));
             sender.sendMessage(Message.WARP_CREATED.get());
             return true;
         }

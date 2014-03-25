@@ -1,6 +1,7 @@
 package io.github.alshain01.rocketteleport;
 
 import io.github.alshain01.flags.*;
+import io.github.alshain01.flags.System;
 import io.github.alshain01.flags.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
 import io.github.alshain01.rocketteleport.Rocket.RocketLocation;
@@ -126,7 +127,7 @@ class RocketListener implements Listener {
                             }
                         }.runTaskLater(plugin, plugin.getConfig().getInt("EasterEggTimeout") * 60 * 20);
                     } else {
-                        double timeout = plugin.getConfig().getInt("EasterEggTimeout") / 60 / 20;
+                        int timeout = plugin.getConfig().getInt("EasterEggTimeout");
                         player.sendMessage(ChatColor.RED + "This can only be used once every " + timeout + " minutes server wide.");
                     }
                     return;

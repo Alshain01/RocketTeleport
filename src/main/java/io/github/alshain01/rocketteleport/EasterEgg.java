@@ -54,7 +54,7 @@ class EasterEgg {
     }
 
     private Location getDropLocation(Location landingArea) {
-        final int RADIUS = 15;
+        final int RADIUS = 20;
         double x = (landingArea.getX() - RADIUS) + Math.random() * (RADIUS*2);
         double z = (landingArea.getZ() - RADIUS) + Math.random() * (RADIUS*2);
         Location loc = new Location(landingArea.getWorld(), x, 0D, z);
@@ -119,7 +119,7 @@ class EasterEgg {
 
         @Override
         public void run() {
-            for(int x = 0; x < 15; x++) {
+            for(int x = 0; x < 46; x++) {
                 Entity entity = location.getWorld().spawnEntity(getDropLocation(location), EntityType.VILLAGER);
                 new DespawnTask(entity).runTaskLater(plugin, TIME * 3);
             }

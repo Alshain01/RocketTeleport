@@ -9,7 +9,7 @@ Message:
   ROCKET_ERROR: '&cYou do not have a rocket creation pending.'
   CREATION_ERROR: '&cYou already have a launch pad pending, use &6/rt land &cto complete it.'
   LOCATION_ERROR: '&cFailed to locate suitable destination after {Retries} attempts.'
-  INVALID_WARP_ERROR: '&cThere is no warp named {Warp} on the server.'
+  INVALID_WARP_ERROR: '&cError: &4That warp does not exist.'
   #
   # Notifications
   #
@@ -19,9 +19,10 @@ Message:
   CANCEL_ROCKET: '&4Rocket LaunchPad creation canceled.'
   ROCKET_CREATED: '&aNew rocket created.'
   TRIGGER_DESTROYED: '&4RocketTeleport Launchpad Destroyed.'
-  WARP_REMOVED: '&aThe warp &6{Warp} &ahas been deleted.'
-  WARP_CREATED: '&aWarp Created.'
-  WARP_LIST: '&bUse /warp <name> to select one of the following destinations: {Warps}'
+  WARP_REMOVED: '&6Warp &c{Warp} &6has been removed.'
+  WARP_CREATED: '&6Warp &c{Warp} &6set.'
+  WARP_LIST: '&6Warps: &f{Warps}'
+  WARP_ACTION: '&6Warping to &c{Warp}'
   #
   # Updater
   #
