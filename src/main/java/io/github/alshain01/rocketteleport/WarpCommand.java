@@ -37,13 +37,14 @@ class WarpCommand implements CommandExecutor {
         if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
             Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
             for(String w : essentials.getWarps().getList()) {
-                if(warps.containsKey(w)) { continue; }
-                try {
-                    warps.put(w, new WarpLocation(essentials.getWarps().getWarp(w), false));
-                } catch (WarpNotFoundException ex) {
-                    plugin.getLogger().info("Failed to import Essentials warp " + w);
-                } catch (InvalidWorldException ex) {
-                    plugin.getLogger().info("Failed to import Essentials warp " + w);
+                if(!warps.containsKey(w)) {
+                    try {
+                        warps.put(w, new WarpLocation(essentials.getWarps().getWarp(w), false));
+                    } catch (WarpNotFoundException ex) {
+                        plugin.getLogger().info("Failed to import Essentials warp " + w);
+                    } catch (InvalidWorldException ex) {
+                        plugin.getLogger().info("Failed to import Essentials warp " + w);
+                    }
                 }
             }
         }
