@@ -23,11 +23,9 @@ class MissionControl implements Listener{
     final private float volume;
     final private float pitch;
     final private int delayTime;
-    final private Plugin plugin;
     final private Map<UUID, BukkitTask> awaitingTeleport = new HashMap<UUID, BukkitTask>();
 
-    MissionControl(Plugin plugin, ConfigurationSection sound, ConfigurationSection timers) {
-        this.plugin = plugin;
+    MissionControl(ConfigurationSection sound, ConfigurationSection timers) {
         this.sound = Sound.valueOf(sound.getString("Type"));
         this.volume = (float)sound.getDouble("Volume");
         this.pitch = (float)sound.getDouble("Pitch");

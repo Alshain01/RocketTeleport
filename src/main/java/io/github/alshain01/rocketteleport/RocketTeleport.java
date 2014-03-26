@@ -56,7 +56,7 @@ public class RocketTeleport extends JavaPlugin {
         message.saveDefaultConfig();
         ConfigurationSerialization.registerClass(Rocket.class);
 
-        missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"));
+        missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"), getConfig().getConfigurationSection("Timer"));
 
         PluginManager pm = Bukkit.getPluginManager();
         ConfigurationSection updateConfig = getConfig().getConfigurationSection("Update");
@@ -88,7 +88,7 @@ public class RocketTeleport extends JavaPlugin {
     void reload() {
         writeData();
         this.reloadConfig();
-        missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"));
+        missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"), getConfig().getConfigurationSection("Sound"));
         message.reload();
         loadData();
     }
