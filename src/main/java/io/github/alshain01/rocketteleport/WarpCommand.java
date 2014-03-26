@@ -33,7 +33,7 @@ class WarpCommand implements CommandExecutor {
         importEssentials();
     }
 
-    void importEssentials() {
+    private void importEssentials() {
         if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
             Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
             for(String w : essentials.getWarps().getList()) {
@@ -129,7 +129,7 @@ class WarpCommand implements CommandExecutor {
                     // Warp to destination
                     if(warps.containsKey(args[0])) {
                         sender.sendMessage(Message.WARP_ACTION.get().replace("{Warp}", args[0]));
-                        plugin.missionControl.liftOff((Player)sender, warps.get(args[0]).getLocation());
+                        plugin.missionControl.liftOff((Player)sender, warps.get(args[0]).getLocation(), true);
                     } else {
                         sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
                     }
@@ -145,6 +145,15 @@ class WarpCommand implements CommandExecutor {
             if(args.length < 1) { return false; }
             if(warps.remove(args[0]) != null) {
                 sender.sendMessage(Message.WARP_REMOVED.get().replace("{Warp}", args[0]));
+                if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
+                    Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
+                    try {
+                        essentials.getWarps().removeWarp(args[0]);
+                    } catch (Exception ex) {
+                        plugin.getLogger().warning("Removed warp " + args[0] + " but failed to find mirroed warp in Essentials.");
+                    }
+                }
+
             } else {
                 sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
             }
@@ -170,6 +179,7 @@ class WarpCommand implements CommandExecutor {
                     essentials.getWarps().setWarp(args[0], ((Player) sender).getLocation());
                 } catch (Exception ex) {
                     sender.sendMessage(ChatColor.RED + "RocketTeleport Error: " + ChatColor.DARK_RED + "Failed to mirror new warp in Essentials.");
+                    plugin.getLogger().warning("Failed to mirror new warp + " + args[0] + " in Essentials.");
                 }
             }
             return true;

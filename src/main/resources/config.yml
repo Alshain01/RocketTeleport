@@ -21,6 +21,13 @@ Sound:
   Volume: 20
   Pitch: 0
 #
+# Timers
+#
+Timer:
+  Cooldown: 0
+  Delay: 0
+  Invulnerability: 4
+#
 # He's running.  He's running. Are they gonna catch him? We don't know.
 # (approximate minutes)
 #

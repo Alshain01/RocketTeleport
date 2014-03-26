@@ -1,7 +1,6 @@
 package io.github.alshain01.rocketteleport;
 
 import io.github.alshain01.flags.*;
-import io.github.alshain01.flags.System;
 import io.github.alshain01.flags.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
 import io.github.alshain01.rocketteleport.Rocket.RocketLocation;
@@ -146,7 +145,7 @@ class RocketListener implements Listener {
                     break;
             }
 
-            plugin.missionControl.liftOff(player, destination);
+            plugin.missionControl.liftOff(player, destination, false);
         }
     }
 
