@@ -25,7 +25,7 @@
 * authors and contributors and should not be interpreted as representing official policies,
 * either expressed or implied, of anybody else.
 */
-package io.github.alshain01.rocketteleport.metrics;
+package io.github.alshain01.rocketteleport;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -43,7 +43,57 @@ import java.util.logging.Level;
 import java.util.zip.GZIPOutputStream;
 
 @SuppressWarnings("ALL")
-public class Metrics {
+class Metrics {
+    public static void StartMetrics(final RocketTeleport plugin) {
+        try {
+            final Metrics metrics = new Metrics(plugin);
+
+            /*
+			 * Rocket Type Graph
+			 */
+            Graph graph = metrics.createGraph("Rocket Types");
+            final Map<Rocket.RocketType, Integer> counts = plugin.getLaunchPad().getRocketCount();
+            for(final Rocket.RocketType r : counts.keySet())
+                graph.addPlotter(new Metrics.Plotter(r.getName()) {
+                    @Override
+                    public int getValue() {
+                        return counts.get(r);
+                    }
+                });
+
+            /*
+			 * Auto Update settings
+			 */
+            graph = metrics.createGraph("Update Configuration");
+            if (!plugin.getConfig().getBoolean("Update.Check")) {
+                graph.addPlotter(new Metrics.Plotter("No Updates") {
+                    @Override
+                    public int getValue() {
+                        return 1;
+                    }
+                });
+            } else if (!plugin.getConfig().getBoolean("Update.Download")) {
+                graph.addPlotter(new Metrics.Plotter("Check for Updates") {
+                    @Override
+                    public int getValue() {
+                        return 1;
+                    }
+                });
+            } else {
+                graph.addPlotter(new Metrics.Plotter("Download Updates") {
+                    @Override
+                    public int getValue() {
+                        return 1;
+                    }
+                });
+            }
+
+            metrics.start();
+        } catch (final IOException e) {
+            plugin.getLogger().info(e.getMessage());
+        }
+    }
+
 
     /**
      * The current revision number

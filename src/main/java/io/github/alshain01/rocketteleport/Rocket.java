@@ -25,7 +25,7 @@
 
 package io.github.alshain01.rocketteleport;
 
-import org.bukkit.Bukkit;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -34,10 +34,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Class for defining a Rocket
+ */
 public class Rocket implements ConfigurationSerializable {
+    /**
+     * Enumeration for the determining the type of rocket
+     */
     public enum RocketType {
         RANDOM, SOFT, HARD, ELEMENT;
 
+        /**
+         * Returns a nice name for the RocketType
+         *
+         * @return The name of the rocket type.
+         */
         public String getName() {
             // Make it look nice (Capital first, lower rest)
             if(this == ELEMENT) {
@@ -47,52 +58,16 @@ public class Rocket implements ConfigurationSerializable {
         }
     }
 
-    class RocketLocation {
-        private final String world;
-        private final double coords[] = new double[3];
-
-        RocketLocation(Location location, boolean normalize) {
-            if(normalize) {
-                // Adjust coordinates to center block.
-                // Use absolute value to produce 1 or -1 in order to
-                // add 0.5 if the coord is positive, subtract if the coord is negative
-                coords[0] = location.getBlockX() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
-                coords[1] = location.getBlockY() + 1;
-                coords[2] = location.getBlockZ() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
-            } else {
-                coords[0] = location.getX() ;
-                coords[1] = location.getY();
-                coords[2] = location.getZ();
-            }
-            world = location.getWorld().getName();
-        }
-
-        RocketLocation(String location) {
-            String[] arg = location.split(",");
-
-            world = arg[0];
-            for (int a = 0; a < 3; a++) {
-                coords[a] = Double.parseDouble(arg[a+1]);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return world + "," + coords[0] + "," + coords[1] + "," + coords[2];
-        }
-
-        public String toKey() {
-            return world + "," + (int)coords[0] + "," + (int)coords[1] + "," + (int)coords[2];
-        }
-
-        public Location getLocation() {
-            return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2]);
-        }
+    /**
+     * Exception thrown when the action can not be performed on the specified RocketType
+     */
+    public class IllegalRocketTypeException extends IllegalArgumentException {
+        IllegalRocketTypeException() { super("The Rocket Type was not valid for the action performed."); }
     }
 
-	private final RocketType type;
-	private RocketLocation trigger = null;
-	private final List<RocketLocation> destination = new ArrayList<RocketLocation>();
+	private RocketType type;
+	private TeleportLocation trigger = null;
+	private final List<TeleportLocation> destination = new ArrayList<TeleportLocation>();
 	private double radius = 0;
 
 	Rocket(RocketType type) {
@@ -104,30 +79,38 @@ public class Rocket implements ConfigurationSerializable {
 		this.radius = radius;
 	}
 
+    /**
+     * Loads and existing rocket from the serialized map
+     */
     Rocket(Map<String, Object> rocket) {
         type = RocketType.valueOf((String)rocket.get("Type"));
-        trigger = new RocketLocation((String)rocket.get("Trigger"));
+        trigger = new TeleportLocation((String)rocket.get("Trigger"));
 
 
         if(rocket.get("Destination") instanceof List<?>) {
             List<?> list = (ArrayList<?>)rocket.get("Destination");
-            List<RocketLocation> locations = new ArrayList<RocketLocation>();
+            List<TeleportLocation> locations = new ArrayList<TeleportLocation>();
             for(Object o : list) {
-                locations.add(new RocketLocation((String)o));
+                locations.add(new TeleportLocation((String)o));
             }
             destination.addAll(locations);
         } else {
             if(rocket.get("Destination").equals("null")) {
                 // Upgrade from v1.1.0 and earlier where Random did not have a destination
-                destination.add(new RocketLocation((String)rocket.get("Trigger")));
+                destination.add(new TeleportLocation((String)rocket.get("Trigger")));
             } else {
                 // Upgrade from v1.2.0 and earlier where rockets supported only one destination
-                destination.add(new RocketLocation((String)rocket.get("Destination")));
+                destination.add(new TeleportLocation((String)rocket.get("Destination")));
             }
         }
         radius = (Double)rocket.get("Radius");
     }
 
+    /**
+     * Serialize the rocket for storage.
+     *
+     * @return A serialized map of the rocket
+     */
     public Map<String, Object> serialize() {
         Map<String, Object> rocket = new HashMap<String, Object>();
         rocket.put("Type", type.toString());
@@ -135,32 +118,119 @@ public class Rocket implements ConfigurationSerializable {
         rocket.put("Radius", radius);
 
         List<String> destinations = new ArrayList<String>();
-        for(RocketLocation l : destination) {
+        for(TeleportLocation l : destination) {
             destinations.add(l.toString());
         }
         rocket.put("Destination",  destinations);
         return rocket;
     }
 
-	RocketType getType() {
+    /**
+     * Gets the type of the rocket.
+     *
+     * @return The rocket type
+     */
+	public RocketType getType() {
 		return type;
 	}
-	
-	RocketLocation getTrigger() { return trigger; }
 
-	List<RocketLocation> getDestination() {	return destination; }
+    /**
+     * Gets the trigger location.
+     *
+     * @return The trigger location for the rocket.
+     */
+    public TeleportLocation getTrigger() {
+        return trigger;
+    }
 
-	double getRadius() {
+    /**
+     * Gets a list of possible destinations for the rocket.
+     *
+     * @return The destination locations
+     */
+	public List<TeleportLocation> getDestination() {
+        return destination;
+    }
+
+    /**
+     * Gets the radius of the Random type rocket.
+     * This is a square radius, not a true radius.
+     *
+     * @return The square radius rocket or 0 if not random.
+     */
+	public double getRadius() {
 		return radius;
 	}
-	
-	Rocket setTrigger(Location trigger) {
-        this.trigger = new RocketLocation(trigger, false);
+
+    /**
+     * Sets a the trigger location of the rocket.
+     *
+     * @param trigger The new trigger location of the rocket.
+     * @return The modified rocket.
+     * @throws IllegalArgumentException - if location is null
+     */
+	public Rocket setTrigger(Location trigger) {
+        Validate.notNull(trigger);
+        this.trigger = new TeleportLocation(trigger, false, false, false);
         return this;
     }
-	
-	Rocket addDestination(Location destination) {
-        this.destination.add(new RocketLocation(destination, true));
+
+    /**
+     * Adds a new destination to the list of possible destinations.
+     * For all rocket types, this should be the final destination.
+     * Do not add to Y to create a HARD RocketType.
+     *
+     * @param destination The destination to add.
+     * @return The modified rocket.
+     * @throws IllegalArgumentException - if destination is null
+     */
+    public Rocket addDestination(Location destination) {
+        Validate.notNull(destination);
+        this.destination.add(new TeleportLocation(destination, true, true, false));
+        return this;
+    }
+
+    /**
+     * Removes a destination from the possible list of destinations.
+     *
+     * @param destination The destination to remove
+     * @return The modified rocket.
+     * @throws IllegalArgumentException - if destination is null
+     */
+    @SuppressWarnings("unused")//API
+    public Rocket removeDestination(TeleportLocation destination) {
+        Validate.notNull(destination);
+        this.destination.remove(destination);
+        return this;
+    }
+
+    /**
+     * Sets the radius for a random rocket. Ignored if the RocketType is not RANDOM.
+     *
+     * @param radius The radius to set
+     * @return The modified rocket.
+     * @throws IllegalRocketTypeException - if not RocketType.RANDOM
+     */
+    @SuppressWarnings("unused") //API
+    public Rocket setRadius(double radius) {
+        if(this.type == RocketType.RANDOM) {
+            throw new IllegalRocketTypeException();
+        }
+        this.radius = radius;
+        return this;
+    }
+
+    /**
+     * Sets the rocket's type.
+     *
+     * @param type The new Rocket Type
+     * @return The modified rocket
+     * @throws IllegalArgumentException - if type is null
+     */
+    @SuppressWarnings("unused") //API
+    public Rocket setType(RocketType type) {
+        Validate.notNull(type);
+        this.type = type;
         return this;
     }
 }

@@ -21,7 +21,16 @@ Sound:
   Volume: 20
   Pitch: 0
 #
-# Timers
+# Timers (in approximate seconds)
+#
+# The delay timer sets the amount of time to wait before teleporting.
+# Players must remain still and take no damage during this time.
+#
+# The cooldown timer prevents players from using teleports too quickly in succession.
+#
+# The invulnerability timer prevents players from taking damage immediately after teleporting.
+#
+# Cooldown and Delay only affect command based teleports, buttons and pressure plates will not apply.
 #
 Timer:
   Cooldown: 0
@@ -44,7 +53,6 @@ Metrics:
 # DO NOT SHARE WITH ANYONE!  The API key will only be uploaded to BukkitDev, not the author of this plugin.
 #
 Update:
-  Check: true
+  Enabled: true
   Interval: 1440
-  Download: false
   ServerModsAPIKey: null

@@ -1,189 +1,106 @@
 package io.github.alshain01.rocketteleport;
 
-import com.earth2me.essentials.Essentials;
-import net.ess3.api.InvalidWorldException;
-import com.earth2me.essentials.commands.WarpNotFoundException;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.Map;
+class WarpCommand implements CommandExecutor{
+    private final Warp warpController;
+    private final MissionControl missionControl;
 
-class WarpCommand implements CommandExecutor {
-    final private Map<String, WarpLocation> warps = new HashMap<String, WarpLocation>();
-    final private RocketTeleport plugin;
-
-    WarpCommand(RocketTeleport plugin) {
-        this.plugin = plugin;
-        importEssentials();
-    }
-
-    WarpCommand(RocketTeleport plugin, ConfigurationSection data) {
-        this.plugin = plugin;
-        for(String s : data.getKeys(false)) {
-            this.warps.put(s, new WarpLocation(data.getString(s)));
-        }
-
-        importEssentials();
-    }
-
-    private void importEssentials() {
-        if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
-            Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
-            for(String w : essentials.getWarps().getList()) {
-                if(!warps.containsKey(w)) {
-                    try {
-                        warps.put(w, new WarpLocation(essentials.getWarps().getWarp(w), false));
-                    } catch (WarpNotFoundException ex) {
-                        plugin.getLogger().info("Failed to import Essentials warp " + w);
-                    } catch (InvalidWorldException ex) {
-                        plugin.getLogger().info("Failed to import Essentials warp " + w);
-                    }
-                }
-            }
-        }
-    }
-
-    void write(ConfigurationSection data) {
-        for(String s : warps.keySet()) {
-            data.set(s, warps.get(s).toString());
-        }
-    }
-
-    private class WarpLocation {
-        private final String world;
-        private final double coords[] = new double[3];
-        private final float view[] = new float[2];
-
-        WarpLocation(Location location, boolean adjustY) {
-            // Adjust coordinates to center block.
-            // Use absolute value to produce 1 or -1 in order to
-            // add 0.5 if the coord is positive, subtract if the coord is negative
-            coords[0] = location.getBlockX() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
-            coords[1] = location.getBlockY() + (adjustY ? 1 : 0);
-            coords[2] = location.getBlockZ() + (location.getBlockX() / Math.abs(location.getBlockX())) * 0.5;
-            world = location.getWorld().getName();
-            view[0] = location.getYaw();
-            view[1] = location.getPitch();
-        }
-
-        WarpLocation(String location) {
-            String[] arg = location.split(",");
-
-            world = arg[0];
-            for (int a = 0; a < 3; a++) {
-                coords[a] = Double.parseDouble(arg[a+1]);
-            }
-
-            if(arg.length > 4) {
-                view[0] = Float.parseFloat(arg[4]);
-                view[1] = Float.parseFloat(arg[5]);
-            } else {
-                view[0] = 0;
-                view[1] = 0;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return world + "," + coords[0] + "," + coords[1] + "," + coords[2] + "," + view[0] + "," + view[1];
-        }
-
-        public Location getLocation() {
-            return new Location(Bukkit.getWorld(world), coords[0], coords[1], coords[2], view[0], view[1]);
-        }
+    WarpCommand(Warp warpController, MissionControl missionControl) {
+        this.warpController = warpController;
+        this.missionControl = missionControl;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(command.getName().equalsIgnoreCase("warp")) {
-            if(!sender.hasPermission("rocketteleport.warp")) {
-                sender.sendMessage(Message.COMMAND_ERROR.get());
+        if(isCommandPermitted(sender, command.getName())) {
+            if(!command.getName().equals("warp") && args.length < 1) { return false; }
+
+            if (command.getName().equalsIgnoreCase("warp")) {
+                warp(sender, args);
                 return true;
-            }
-
-            if (args.length < 1) {
-                StringBuilder warpNames = new StringBuilder();
-                boolean first = true;
-                for(String s : warps.keySet()) {
-                    if(!first) {
-                        warpNames.append(", ");
-                    } else {
-                        first = false;
-                    }
-                    warpNames.append(s);
-                }
-                warpNames.append(".");
-
-                sender.sendMessage(Message.WARP_LIST.get().replace("{Warps}", warpNames.toString()));
-            } else {
-                if(!(sender instanceof Player)) {
-                    sender.sendMessage(Message.CONSOLE_ERROR.get());
-                } else {
-                    // Warp to destination
-                    if(warps.containsKey(args[0])) {
-                        sender.sendMessage(Message.WARP_ACTION.get().replace("{Warp}", args[0]));
-                        plugin.missionControl.liftOff((Player)sender, warps.get(args[0]).getLocation(), true);
-                    } else {
-                        sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
-                    }
+            } else if (command.getName().equalsIgnoreCase("delwarp")) {
+                delWarp(sender, args);
+                return true;
+            } else if (command.getName().equalsIgnoreCase("setwarp")) {
+                if (isPlayerSender(sender)) {
+                    setWarp(sender, args);
+                    return true;
                 }
             }
-            return true;
-        } else if (command.getName().equalsIgnoreCase("delwarp")) {
-            if(!sender.hasPermission("rocketteleport.delwarp")) {
-                sender.sendMessage(Message.COMMAND_ERROR.get());
-                return true;
-            }
-
-            if(args.length < 1) { return false; }
-            if(warps.remove(args[0]) != null) {
-                sender.sendMessage(Message.WARP_REMOVED.get().replace("{Warp}", args[0]));
-                if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
-                    Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
-                    try {
-                        essentials.getWarps().removeWarp(args[0]);
-                    } catch (Exception ex) {
-                        plugin.getLogger().warning("Removed warp " + args[0] + " but failed to find mirroed warp in Essentials.");
-                    }
-                }
-
-            } else {
-                sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
-            }
-            return true;
-        } else if (command.getName().equalsIgnoreCase("setwarp")) {
-            // All the remaining commands require a player
-            if(!(sender instanceof Player)) {
-                sender.sendMessage(Message.CONSOLE_ERROR.get());
-                return true;
-            }
-
-            if (args.length < 1) { return false; }
-            if(!sender.hasPermission("rocketteleport.setwarp")) {
-                sender.sendMessage(Message.COMMAND_ERROR.get());
-                return true;
-            }
-
-            warps.put(args[0], new WarpLocation(((Player) sender).getLocation(), true));
-            sender.sendMessage(Message.WARP_CREATED.get().replace("{Warp}", args[0]));
-            if(plugin.getServer().getPluginManager().isPluginEnabled("Essentials")) {
-                Essentials essentials = (Essentials)plugin.getServer().getPluginManager().getPlugin("Essentials");
-                try {
-                    essentials.getWarps().setWarp(args[0], ((Player) sender).getLocation());
-                } catch (Exception ex) {
-                    sender.sendMessage(ChatColor.RED + "RocketTeleport Error: " + ChatColor.DARK_RED + "Failed to mirror new warp in Essentials.");
-                    plugin.getLogger().warning("Failed to mirror new warp + " + args[0] + " in Essentials.");
-                }
-            }
+        } else {
             return true;
         }
+        return false;
+    }
+
+    private void warp(CommandSender sender, String[] args) {
+        if (args.length < 1) {
+            // List all warps
+            boolean first = true;
+            StringBuilder warpNames = new StringBuilder();
+
+            for(String s : warpController.get()) {
+                if(!first)
+                    warpNames.append(", ");
+                else
+                    first = false;
+
+                warpNames.append(s);
+            }
+            sender.sendMessage(Message.WARP_LIST.get().replace("{Warps}", warpNames.toString()));
+        } else {
+            // Warp to destination
+            if(isPlayerSender(sender)) {
+                if(warpController.isWarp(args[0])) {
+                    sender.sendMessage(Message.WARP_ACTION.get().replace("{Warp}", args[0]));
+                    missionControl.liftOff((Player)sender, warpController.get(args[0]).getLocation(), true, true);
+                } else {
+                    sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
+                }
+            }
+        }
+    }
+
+    private void delWarp(CommandSender sender, String[] args) {
+        if(!warpController.isWarp(args[0])) {
+            sender.sendMessage(Message.INVALID_WARP_ERROR.get().replace("{Warp}", args[0]));
+            return;
+        }
+
+        // Remove the warp
+        warpController.remove(args[0]);
+        sender.sendMessage(Message.WARP_REMOVED.get().replace("{Warp}", args[0]));
+    }
+
+    private void setWarp(CommandSender sender, String[] args) {
+        // Create new warp
+        if(warpController.isWarp(args[0])) {
+            sender.sendMessage(Message.WARP_EXISTS_ERROR.get().replace("{Warp}", args[0]));
+            return;
+        }
+
+        sender.sendMessage(Message.WARP_CREATED.get().replace("{Warp}", args[0]));
+        warpController.add(args[0], ((Player) sender).getLocation());
+
+    }
+
+    private boolean isCommandPermitted(CommandSender sender, String command) {
+        if(sender.hasPermission("rocketteleport." + command.toLowerCase())) {
+            return true;
+        }
+        sender.sendMessage(Message.COMMAND_ERROR.get());
+        return false;
+    }
+
+    private boolean isPlayerSender(CommandSender sender) {
+        if(sender instanceof Player) {
+            return true;
+        }
+        sender.sendMessage(Message.CONSOLE_ERROR.get());
         return false;
     }
 }

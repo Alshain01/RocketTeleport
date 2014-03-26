@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -23,13 +24,16 @@ class MissionControl implements Listener{
     final private float volume;
     final private float pitch;
     final private int delayTime;
+    final private int cooldownTime;
     final private Map<UUID, BukkitTask> awaitingTeleport = new HashMap<UUID, BukkitTask>();
+    final private Map<UUID, Date> cooldown = new HashMap<UUID, Date>();
 
     MissionControl(ConfigurationSection sound, ConfigurationSection timers) {
         this.sound = Sound.valueOf(sound.getString("Type"));
         this.volume = (float)sound.getDouble("Volume");
         this.pitch = (float)sound.getDouble("Pitch");
         this.delayTime = timers.getInt("Delay");
+        this.cooldownTime = timers.getInt("Cooldown");
     }
 
     @EventHandler
@@ -44,7 +48,15 @@ class MissionControl implements Listener{
         }
     }
 
-    void liftOff(Player player, Location destination, boolean delay) {
+    void liftOff(Player player, Location destination, boolean delay, boolean cooldown) {
+        if(cooldown && this.cooldown.containsKey(player.getUniqueId())) {
+            long cooldownRemaining = cooldownTime - ((this.cooldown.get(player.getUniqueId()).getTime() - new Date().getTime())/1000);
+            if(cooldownRemaining >= cooldownTime) {
+                player.sendMessage(Message.COOLDOWN_ERROR.get().replace("{Time}", String.valueOf(cooldownRemaining)));
+                return;
+            }
+        }
+
         Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("RocketTeleport");
 
         BukkitTask task;
@@ -53,6 +65,7 @@ class MissionControl implements Listener{
         } else {
             task = new Launch(player, destination, delay).runTaskLater(plugin, delayTime * 20);
         }
+
         if(delay && delayTime > 0) {
             player.sendMessage(Message.TELEPORT_DELAY.get().replace("{Time}", String.valueOf(delayTime)));
             awaitingTeleport.put(player.getUniqueId(), task);
@@ -107,5 +120,6 @@ class MissionControl implements Listener{
             player.setVelocity(new Vector(0D, 0D, 0D));
             player.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
             awaitingTeleport.remove(player.getUniqueId());
+            cooldown.put(player.getUniqueId(), new Date());
         }
     }}

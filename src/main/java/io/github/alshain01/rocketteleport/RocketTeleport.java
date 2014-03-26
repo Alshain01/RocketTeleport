@@ -27,23 +27,19 @@ package io.github.alshain01.rocketteleport;
 
 import java.util.*;
 
-import io.github.alshain01.rocketteleport.Rocket.RocketType;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
-import io.github.alshain01.rocketteleport.metrics.MetricsManager;
-import io.github.alshain01.rocketteleport.update.UpdateScheduler;
-import io.github.alshain01.rocketteleport.update.UpdateListener;
 
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+@SuppressWarnings("WeakerAccess") //API
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access
 	LaunchPad launchPad;
-    private WarpCommand warpController;
+    private Warp warpController;
     MissionControl missionControl;
 
     final Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
@@ -58,20 +54,12 @@ public class RocketTeleport extends JavaPlugin {
 
         missionControl = new MissionControl(getConfig().getConfigurationSection("Sound"), getConfig().getConfigurationSection("Timer"));
 
-        PluginManager pm = Bukkit.getPluginManager();
-        ConfigurationSection updateConfig = getConfig().getConfigurationSection("Update");
-        if (updateConfig.getBoolean("Check")) {
-            UpdateScheduler updater = new UpdateScheduler(this, getFile(), updateConfig);
-            Long timer = updateConfig.getLong("Interval");
-            if(timer < 1L) {
-                updater.runTaskAsynchronously(this);
-            } else {
-                updater.runTaskTimerAsynchronously(this, 0L, timer * 1200L);
-            }
-            pm.registerEvents(new UpdateListener(updater), this);
-        }
 
-        pm.registerEvents(new RocketListener(this), this);
+        // Configure the updater
+        if (getConfig().getBoolean("Update.Enabled")) {
+            new io.github.alshain01.rocketteleport.Updater(this);
+        }
+        Bukkit.getPluginManager().registerEvents(new RocketListener(this), this);
         getCommand("rocketteleport").setExecutor(new PluginCommand(this));
         new ServerEnabledTasks(this).run();
 	}
@@ -106,13 +94,14 @@ public class RocketTeleport extends JavaPlugin {
         }
 
         if(data.getConfig().isConfigurationSection("Warps")) {
-            warpController = new WarpCommand(this, data.getConfig().getConfigurationSection("Warps"));
+            warpController = new Warp(this, data.getConfig().getConfigurationSection("Warps"));
         } else {
-            warpController = new WarpCommand(this);
+            warpController = new Warp(this);
         }
-        getCommand("warp").setExecutor(warpController);
-        getCommand("delwarp").setExecutor(warpController);
-        getCommand("setwarp").setExecutor(warpController);
+        CommandExecutor warpExecutor = new WarpCommand(warpController, missionControl);
+        getCommand("warp").setExecutor(warpExecutor);
+        getCommand("delwarp").setExecutor(warpExecutor);
+        getCommand("setwarp").setExecutor(warpExecutor);
     }
 
     @Override
@@ -121,10 +110,11 @@ public class RocketTeleport extends JavaPlugin {
         ConfigurationSerialization.unregisterClass(Rocket.class);
     }
 
-    // Public pass-through
-    public Map<RocketType, Integer> getRocketCount() {
-        return launchPad.getRocketCount();
-    }
+    @SuppressWarnings("unused") // API
+    public LaunchPad getLaunchPad() { return this.launchPad; }
+
+    @SuppressWarnings("unused") // API
+    public Warp getWarps() { return warpController; }
 
     /*
      * Tasks that must be run only after the entire sever has loaded. Runs on
@@ -142,7 +132,7 @@ public class RocketTeleport extends JavaPlugin {
             plugin.loadData();
 
             if(plugin.getConfig().getBoolean("Metrics.Enabled")) {
-                MetricsManager.StartMetrics(plugin);
+                Metrics.StartMetrics(plugin);
             }
         }
     }

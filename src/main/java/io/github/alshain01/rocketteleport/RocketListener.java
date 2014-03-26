@@ -3,7 +3,7 @@ package io.github.alshain01.rocketteleport;
 import io.github.alshain01.flags.*;
 import io.github.alshain01.flags.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
-import io.github.alshain01.rocketteleport.Rocket.RocketLocation;
+
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -104,14 +104,14 @@ class RocketListener implements Listener {
             plugin.commandQueue.remove(pID);
         } else if ((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.PHYSICAL) && TRIGGER_TYPES.contains(block.getType())) {
             // Rocket Use
-            if(plugin.launchPad.noRocket(block.getLocation())) { return; }
+            if(!plugin.launchPad.hasRocket(block.getLocation())) { return; }
             if(isFlagSet(flags.get("UseRocket"), player, e.getClickedBlock().getLocation())) { return; }
 
             // Undo anti-grief measures for rockets.
             e.setCancelled(false);
 
             Rocket rocket = plugin.launchPad.getRocket(block.getLocation());
-            List<RocketLocation> possibleDestinations = rocket.getDestination();
+            List<TeleportLocation> possibleDestinations = rocket.getDestination();
             Location destination = possibleDestinations.get((int)(Math.random()*(possibleDestinations.size() -1))).getLocation();
 
             switch(rocket.getType()) {
@@ -145,7 +145,7 @@ class RocketListener implements Listener {
                     break;
             }
 
-            plugin.missionControl.liftOff(player, destination, false);
+            plugin.missionControl.liftOff(player, destination, false, false);
         }
     }
 

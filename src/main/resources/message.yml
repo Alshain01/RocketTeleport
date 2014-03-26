@@ -21,7 +21,7 @@ Message:
   TRIGGER_DESTROYED: '&4RocketTeleport Launchpad Destroyed.'
   WARP_REMOVED: '&6Warp &c{Warp} &6has been removed.'
   WARP_CREATED: '&6Warp &c{Warp} &6set.'
-  WARP_LIST: '&6Warps: &f{Warps}'
+  WARP_LIST: '&6Warps: &f{Warps}.'
   WARP_ACTION: '&6Warping to &c{Warp}'
   #
   # Updater

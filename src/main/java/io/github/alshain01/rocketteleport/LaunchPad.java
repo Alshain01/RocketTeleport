@@ -29,11 +29,12 @@ import io.github.alshain01.rocketteleport.Rocket.RocketType;
 
 import java.util.*;
 
+import org.apache.commons.lang.Validate;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
-class LaunchPad {
+public class LaunchPad {
 	//Stores a list of fully created and active rockets
 	private final Map<Location, Rocket> launchpads = new HashMap<Location, Rocket>();
 
@@ -60,22 +61,54 @@ class LaunchPad {
         }
     }
 
-    void addRocket(Rocket rocket) {
+    /**
+     * Adds a new rocket to the available launch pads
+     * @param rocket The rocket to add
+     * @throws IllegalArgumentException - if rocket is null.
+     */
+    public void addRocket(Rocket rocket) {
+        Validate.notNull(rocket);
         launchpads.put(rocket.getTrigger().getLocation(), rocket);
     }
 
-    void removeRocket(Player player, Location location) {
+    /**
+     * Removes a rocket launch pad if it exists (optional operation)
+     * @param player The player to notify of the launchpads destruction (may be null)
+     * @param location The location of the rocket trigger.
+     * @throws IllegalArgumentException - if location is null
+     *
+     */
+    public void removeRocket(Player player, Location location) {
+        Validate.notNull(location);
         if(launchpads.containsKey(location)) {
             launchpads.remove(location);
-            player.sendMessage(Message.TRIGGER_DESTROYED.get());
+            if(player != null) {
+                player.sendMessage(Message.TRIGGER_DESTROYED.get());
+            }
         }
     }
 
-    boolean noRocket(Location location) {
-        return !launchpads.containsKey(location);
+    /**
+     * Gets if the provided location has a rocket trigger
+     *
+     * @param location The location to check.
+     * @return true if a rocket exists.
+     * @throws IllegalArgumentException - if location is null
+     */
+    public boolean hasRocket(Location location) {
+        Validate.notNull(location);
+        return launchpads.containsKey(location);
     }
 
-    Rocket getRocket(Location location) {
+    /**
+     * Gets the rocket at the provided location
+     *
+     * @param location The location to retrieve the rocket for.
+     * @return the rocket at the provided location or null if it does not exist
+     * @throws IllegalArgumentException - if location is null
+     */
+    public Rocket getRocket(Location location) {
+        Validate.notNull(location);
         return launchpads.get(location);
     }
 
