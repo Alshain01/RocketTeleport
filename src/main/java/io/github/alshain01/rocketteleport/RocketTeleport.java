@@ -35,6 +35,9 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Plugin Main Class
+ */
 @SuppressWarnings("WeakerAccess") //API
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access

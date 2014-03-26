@@ -4,6 +4,9 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+/**
+ * Defines a "safe storage" location
+ */
 public class TeleportLocation {
     private final String world;
     private final double coords[] = new double[3];
@@ -23,7 +26,7 @@ public class TeleportLocation {
      * Creates a new TeleportLocation
      *
      * @param location The location to create a TeleportLocation from
-     * @param normalize X and Z coordinates will be adjusted to n.5
+     * @param normalize X and Z coordinates will be adjusted to n.5 (center block)
      * @param adjustY Y coordinate will be adjusted n + 1 (for PlayerInteractEvent locations)
      * @param storeRotation Yaw and Pitch will be recorded, recorded as 0 if false.
      * @throws IllegalArgumentException - if location is null
@@ -47,7 +50,7 @@ public class TeleportLocation {
      * @throws IllegalArgumentException - if the string is not properly formatted or location is null.
      * @throws NumberFormatException - if the coordinates could not be parsed.
      */
-    TeleportLocation(String location) {
+    public TeleportLocation(String location) {
         Validate.notNull(location);
         String[] arg = location.split(",");
         if(arg.length != 4 && arg.length != 6) {

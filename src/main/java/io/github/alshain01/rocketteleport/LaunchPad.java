@@ -34,6 +34,9 @@ import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
+/**
+ * Defines a Rocket LaunchPad
+ */
 public class LaunchPad {
 	//Stores a list of fully created and active rockets
 	private final Map<Location, Rocket> launchpads = new HashMap<Location, Rocket>();

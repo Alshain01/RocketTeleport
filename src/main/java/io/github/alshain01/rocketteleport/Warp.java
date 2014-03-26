@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Defines a set of warps
+ */
 public class Warp {
     final private Map<String, TeleportLocation> warps = new HashMap<String, TeleportLocation>();
     final private RocketTeleport plugin;

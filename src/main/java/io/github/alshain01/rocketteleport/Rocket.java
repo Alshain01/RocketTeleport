@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class for defining a Rocket
+ * Defines a Rocket
  */
 public class Rocket implements ConfigurationSerializable {
     /**
