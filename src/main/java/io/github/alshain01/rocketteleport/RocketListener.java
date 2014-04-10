@@ -1,11 +1,13 @@
 package io.github.alshain01.rocketteleport;
 
-import io.github.alshain01.flags.*;
-import io.github.alshain01.flags.area.Area;
+import io.github.alshain01.flags.api.Flag;
+import io.github.alshain01.flags.api.FlagsAPI;
+import io.github.alshain01.flags.api.area.Area;
 import io.github.alshain01.rocketteleport.PluginCommand.PluginCommandType;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,7 +32,7 @@ class RocketListener implements Listener {
     private final int retries;
     private boolean easterEggTimeout;
     private final Set<Material> exclusions = new HashSet<Material>();
-    private final Map<String, Object> flags = new HashMap<String, Object>();
+    private final Map<String, Object> flagMap = new HashMap<String, Object>();
 
     RocketListener(RocketTeleport plugin) {
         this.plugin = plugin;
@@ -44,9 +46,10 @@ class RocketListener implements Listener {
 
         if(Bukkit.getServer().getPluginManager().isPluginEnabled("Flags")) {
             plugin.getLogger().info("Enabling Flags Integration");
-            Set<Flag> flagSet = Flags.getRegistrar().register(new ModuleYML(plugin, "flags.yml"), plugin.getName());
-            for(Flag f : flagSet) {
-                flags.put(f.getName(), f);
+            YamlConfiguration flagConfig = YamlConfiguration.loadConfiguration(plugin.getResource("flags.yml"));
+            Collection<Flag> flags = FlagsAPI.getRegistrar().registerFlag(flagConfig, "Block");
+            for(Flag f : flags) {
+                flagMap.put(f.getName(), f);
             }
         }
     }
@@ -83,7 +86,7 @@ class RocketListener implements Listener {
 
             switch(action) {
                 case LAND:
-                    if(isFlagSet(flags.get("SetRocketLanding"), player, block.getLocation())) { break; }
+                    if(isFlagSet(flagMap.get("SetRocketLanding"), player, block.getLocation())) { break; }
                     plugin.launchPad.addRocket(plugin.rocketQueue.get(pID).addDestination(block.getLocation()));
                     player.sendMessage(Message.ROCKET_CREATED.get());
                     plugin.rocketQueue.remove(pID);
@@ -93,7 +96,7 @@ class RocketListener implements Listener {
                 case RANDOM:
                 case VILLAGER14:
                     if(!TRIGGER_TYPES.contains(e.getClickedBlock().getType())) { return; }
-                    if(isFlagSet(flags.get("CreateRocket"), player, block.getLocation())) { break; }
+                    if(isFlagSet(flagMap.get("CreateRocket"), player, block.getLocation())) { break; }
                     plugin.rocketQueue.put(pID, plugin.rocketQueue.get(pID).setTrigger(block.getLocation()));
                     player.sendMessage(Message.COMMAND_INSTRUCTION.get().replace("{Command}", "/rt land"));
                     break;
@@ -105,7 +108,7 @@ class RocketListener implements Listener {
         } else if ((e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.PHYSICAL) && TRIGGER_TYPES.contains(block.getType())) {
             // Rocket Use
             if(!plugin.launchPad.hasRocket(block.getLocation())) { return; }
-            if(isFlagSet(flags.get("UseRocket"), player, e.getClickedBlock().getLocation())) { return; }
+            if(isFlagSet(flagMap.get("UseRocket"), player, e.getClickedBlock().getLocation())) { return; }
 
             // Undo anti-grief measures for rockets.
             e.setCancelled(false);
@@ -152,9 +155,9 @@ class RocketListener implements Listener {
     private boolean isFlagSet(Object flag, Player player, Location location) {
         if(flag == null) { return false; }
         Flag f = (Flag)flag;
-        Area area = CuboidType.getActive().getAreaAt(location);
+        Area area = FlagsAPI.getAreaAt(location);
 
-        if(!area.getValue(f, false) && !player.hasPermission(f.getBypassPermission()) && !area.hasTrust(f, player)) {
+        if(!area.getState(f) && !player.hasPermission(f.getBypassPermission()) && !area.hasTrust(f, player)) {
             player.sendMessage(area.getMessage(f, player.getName()));
             return true;
         }
