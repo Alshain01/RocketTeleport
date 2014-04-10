@@ -10,6 +10,8 @@ Message:
   CREATION_ERROR: '&cYou already have a launch pad pending, use &6/rt land &cto complete it.'
   LOCATION_ERROR: '&cFailed to locate suitable destination after {Retries} attempts.'
   INVALID_WARP_ERROR: '&cError: &4That warp does not exist.'
+  WARP_EXISTS_ERROR: '&4A warp with a similar name already exists.'
+  COOLDOWN_ERROR: '&cError: &4Time before next teleport: &c{Time}
   #
   # Notifications
   #
@@ -19,10 +21,16 @@ Message:
   CANCEL_ROCKET: '&4Rocket LaunchPad creation canceled.'
   ROCKET_CREATED: '&aNew rocket created.'
   TRIGGER_DESTROYED: '&4RocketTeleport Launchpad Destroyed.'
+  #
+  # Warps
+  #
   WARP_REMOVED: '&6Warp &c{Warp} &6has been removed.'
   WARP_CREATED: '&6Warp &c{Warp} &6set.'
   WARP_LIST: '&6Warps: &f{Warps}.'
   WARP_ACTION: '&6Warping to &c{Warp}'
+  TELEPORT_DELAY: '&6Teleportation will commence in &c{Time}&6.  Don't move.'
+  TELEPORT_COMMENCING: '&6Teleportation commencing...'
+  TELEPORT_CANCELLED: '&4Pending teleportation request cancelled.'
   #
   # Updater
   #
