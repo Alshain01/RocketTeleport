@@ -19,6 +19,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 class RocketListener implements Listener {
@@ -46,7 +48,13 @@ class RocketListener implements Listener {
 
         if(Bukkit.getServer().getPluginManager().isPluginEnabled("Flags")) {
             plugin.getLogger().info("Enabling Flags Integration");
-            YamlConfiguration flagConfig = YamlConfiguration.loadConfiguration(plugin.getResource("flags.yml"));
+            YamlConfiguration flagConfig;
+            try {
+                flagConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("flags.yml"), "UTF8"));
+            } catch(UnsupportedEncodingException ex) {
+                plugin.getLogger().severe("Failed to load Flags configuration.");
+                return;
+            }
             Collection<Flag> flags = FlagsAPI.getRegistrar().registerFlag(flagConfig, "Block");
             for(Flag f : flags) {
                 flagMap.put(f.getName(), f);

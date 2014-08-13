@@ -29,9 +29,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.logging.Level;
 
 /**
@@ -66,9 +64,14 @@ final class CustomYML {
 
         // Look for defaults in the jar
         final InputStream defConfigStream = plugin.getResource(dataFile);
+        YamlConfiguration defConfig;
         if (defConfigStream != null) {
-            final YamlConfiguration defConfig = YamlConfiguration
-                    .loadConfiguration(defConfigStream);
+            try {
+                defConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defConfigStream, "UTF8"));
+            } catch(UnsupportedEncodingException ex) {
+                plugin.getLogger().severe("Failed to load plugin default configuration.");
+                return;
+            }
             customConfig.setDefaults(defConfig);
         }
     }

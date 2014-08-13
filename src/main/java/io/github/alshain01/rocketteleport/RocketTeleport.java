@@ -41,8 +41,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 @SuppressWarnings("WeakerAccess") //API
 public class RocketTeleport extends JavaPlugin {
     static CustomYML message;  // Static for enumeration access
-	LaunchPad launchPad;
-    private Warp warpController;
+	LaunchPad launchPad = new LaunchPad();
+    private Warp warpController = new Warp(this);
     MissionControl missionControl;
 
     final Map<UUID, PluginCommandType> commandQueue = new HashMap<UUID, PluginCommandType>();
@@ -69,10 +69,8 @@ public class RocketTeleport extends JavaPlugin {
 
     void writeData() {
         CustomYML data = new CustomYML(this, "data.yml");
-        data.getConfig().createSection("LaunchPads"); //Overwrite every time
-        launchPad.write(data.getConfig().getConfigurationSection("LaunchPads"));
-        data.getConfig().createSection("Warps"); //Overwrite every time
-        warpController.write(data.getConfig().getConfigurationSection("Warps"));
+        launchPad.write(data.getConfig().createSection("LaunchPads")); //Overwrite every time
+        warpController.write(data.getConfig().createSection("Warps")); //Overwrite every time
         data.saveConfig();
     }
 
@@ -92,15 +90,12 @@ public class RocketTeleport extends JavaPlugin {
         CustomYML data = new CustomYML(this, "data.yml");
         if(data.getConfig().isConfigurationSection("LaunchPads")) {
             launchPad = new LaunchPad(data.getConfig().getConfigurationSection("LaunchPads"));
-        } else {
-            launchPad = new LaunchPad();
         }
 
         if(data.getConfig().isConfigurationSection("Warps")) {
             warpController = new Warp(this, data.getConfig().getConfigurationSection("Warps"));
-        } else {
-            warpController = new Warp(this);
         }
+
         CommandExecutor warpExecutor = new WarpCommand(warpController, missionControl);
         getCommand("warp").setExecutor(warpExecutor);
         getCommand("delwarp").setExecutor(warpExecutor);
@@ -128,7 +123,6 @@ public class RocketTeleport extends JavaPlugin {
         ServerEnabledTasks(RocketTeleport plugin) {
             this.plugin = plugin;
         }
-
 
         @Override
         public void run() {
